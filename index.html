@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>30 Wordles</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem("30wordles-theme"); } catch (e) {}
+      if (t !== "dark" && t !== "light") {
+        t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="wordmark" href="index.html">30 <span>Wordles</span></a>
+    <button class="theme-toggle" type="button" aria-label="Toggle color theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <main class="page">
+    <div class="hero">
+      <h1>30 Wordle games in 30 days.</h1>
+      <p class="lede">A challenge I set for myself: design one Wordle variant every
+      day for a month. Each Day below is what I designed for that day. Feel free
+      to play and give me feedback!</p>
+    </div>
+
+    <section>
+      <div class="day-grid">
+    <a class="day-card active" href="days/day-1.html">
+      <span class="num">Day 1</span>
+      <span class="name">Bundle</span>
+      <span class="blurb">Each guess bundles a letter into the next.</span>
+    </a>
+    <div class="day-card empty">
+      <span class="num">Day 2</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 3</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 4</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 5</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 6</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 7</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 8</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 9</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 10</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 11</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 12</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 13</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 14</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 15</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 16</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 17</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 18</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 19</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 20</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 21</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 22</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 23</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 24</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 25</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 26</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 27</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 28</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 29</span>
+      <span class="name">nothing yet</span>
+    </div>
+    <div class="day-card empty">
+      <span class="num">Day 30</span>
+      <span class="name">nothing yet</span>
+    </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">One Wordle variant a day, just to see what happens.</footer>
+
+  <script src="js/theme.js"></script>
+</body>
+</html>

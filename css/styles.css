@@ -1,0 +1,416 @@
+/* 30 Wordles — shared styles.
+   Theme tokens switch via [data-theme] on <html>; theme.js sets it
+   (persisted in localStorage, defaulting to the OS preference). */
+
+:root {
+  --bg: #ffffff;
+  --surface: #f6f6f4;
+  --text: #1c1c1e;
+  --muted: #6e7076;
+  --border: #e4e5e7;
+  --hover: #ededeb;
+
+  /* Wordle tile palette (light) */
+  --correct: #6aaa64;
+  --present: #c9b458;
+  --absent: #787c7e;
+  --on-color: #ffffff;
+  --key-bg: #d3d6da;
+  --key-text: #1c1c1e;
+  --tile-border: #d3d6da;
+  --tile-border-filled: #8a8d91;
+
+  /* Bundle accent — carried letters */
+  --accent: #1273b5;
+  --accent-soft: rgba(18, 115, 181, 0.09);
+}
+
+[data-theme="dark"] {
+  --bg: #121213;
+  --surface: #1b1c1e;
+  --text: #f1f2f4;
+  --muted: #939599;
+  --border: #2b2c2f;
+  --hover: #26272a;
+
+  /* Wordle tile palette (dark) */
+  --correct: #538d4e;
+  --present: #b59f3b;
+  --absent: #3a3a3c;
+  --on-color: #ffffff;
+  --key-bg: #818384;
+  --key-text: #121213;
+  --tile-border: #3a3a3c;
+  --tile-border-filled: #636467;
+
+  --accent: #79c0e8;
+  --accent-soft: rgba(121, 192, 232, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+::selection { background: var(--accent-soft); }
+
+/* ---------- Header / footer ---------- */
+
+.site-header {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.wordmark span { color: var(--muted); font-weight: 500; }
+.wordmark:hover { text-decoration: none; color: var(--accent); }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--muted); }
+.theme-toggle svg { width: 17px; height: 17px; }
+.icon-moon { display: none; }
+[data-theme="dark"] .icon-sun { display: none; }
+[data-theme="dark"] .icon-moon { display: block; }
+
+.site-footer {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+/* ---------- Page scaffolding ---------- */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px 24px 48px;
+}
+.page.narrow { max-width: 620px; }
+
+.eyebrow {
+  margin: 18px 0 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0 0 28px;
+  font-size: 18px;
+  color: var(--muted);
+  max-width: 56ch;
+}
+
+/* ---------- Home: day grid ---------- */
+
+.hero { padding: 34px 0 8px; }
+
+.day-grid {
+  margin-top: 34px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 12px;
+}
+
+.day-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px 15px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.15s ease,
+    background-color 0.15s ease;
+}
+.day-card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: var(--muted);
+}
+
+.day-card .num {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.day-card .name { font-weight: 650; font-size: 15.5px; }
+.day-card .blurb { font-size: 13.5px; color: var(--muted); }
+
+.day-card.empty { color: var(--muted); background: transparent; cursor: default; }
+.day-card.empty:hover { transform: none; border-color: var(--border); }
+
+.day-card.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.day-card.active .num { color: var(--accent); }
+
+/* ---------- Variant pages ---------- */
+
+.rules {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 0 0 30px;
+  background: var(--surface);
+}
+.rules h2 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.rules ul { margin: 0; padding-left: 18px; }
+.rules li { margin: 4px 0; font-size: 14.5px; }
+.rules code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  background: var(--hover);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+/* ---------- Bundle board ---------- */
+
+.game {
+  max-width: 350px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Guess rows are separated by 5px seams; each chain pair spans its two
+   rows plus the seam and renders as a single bundled rectangle. */
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: auto 5px auto 5px auto 5px auto 5px auto 5px auto;
+  column-gap: 5px;
+  width: 100%;
+}
+
+.tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 7vw, 30px);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+  border: 2px solid var(--tile-border);
+  border-radius: 3px;
+  color: var(--text);
+  user-select: none;
+  transition: border-color 0.1s ease, background-color 0.15s ease;
+}
+.tile.filled { border-color: var(--tile-border-filled); }
+
+.tile.reveal { animation: flip 0.55s ease forwards; }
+@keyframes flip {
+  0% { transform: rotateX(0); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
+}
+
+.tile.shake { animation: shake 0.55s ease; }
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.tile.correct { background: var(--correct); border-color: var(--correct); color: var(--on-color); }
+.tile.present { background: var(--present); border-color: var(--present); color: var(--on-color); }
+.tile.absent  { background: var(--absent);  border-color: var(--absent);  color: var(--on-color); }
+
+/* Two connected tiles shown as one 1-wide, 2-tall rectangle.
+   chain: letter not delivered yet · armed: carried letter in place ·
+   spent: both halves scored, colors stand alone */
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg);
+  border: 2px solid var(--tile-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+.pair.chain { border-style: dashed; border-color: var(--accent); }
+.pair.armed { border-color: var(--accent); }
+.pair.spent { border-color: transparent; }
+
+.pair .tile {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  aspect-ratio: auto;
+  border: none;
+  border-radius: 0;
+}
+.pair .tile.filled { background: var(--hover); }
+.pair .tile.carried { background: var(--accent-soft); }
+
+/* ---------- Keyboard ---------- */
+
+.keyboard {
+  margin-top: 22px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+}
+.key-row { display: flex; gap: 5px; justify-content: center; }
+.key {
+  flex: 1;
+  max-width: 42px;
+  height: 52px;
+  border: none;
+  border-radius: 4px;
+  background: var(--key-bg);
+  color: var(--key-text);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.key:hover { opacity: 0.85; }
+.key.wide { max-width: 62px; font-size: 10.5px; }
+.key.correct { background: var(--correct); color: var(--on-color); }
+.key.present { background: var(--present); color: var(--on-color); }
+.key.absent  { background: var(--absent);  color: var(--on-color); }
+
+/* ---------- Game state UI ---------- */
+
+.game-banner {
+  margin-top: 18px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-align: center;
+  display: none;
+}
+.game-banner.show { display: block; }
+
+.game-actions { margin-top: 16px; display: flex; gap: 10px; }
+
+.btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.btn:hover { border-color: var(--muted); background: var(--hover); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+[data-theme="dark"] .btn.primary { color: #121213; }
+.btn.primary:hover { opacity: 0.9; background: var(--accent); }
+.btn.hidden { display: none; }
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 84px;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  padding: 12px 20px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  max-width: calc(100vw - 48px);
+  text-align: center;
+}
+.toast.show { opacity: 1; }
+
+/* ---------- Misc ---------- */
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header, .page, .site-footer { padding-left: 16px; padding-right: 16px; }
+  .key { height: 48px; }
+}
