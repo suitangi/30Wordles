@@ -1,7 +1,11 @@
 // Bundle — Day 1 variant of 30 Wordles.
-// Plain Wordle, except each guess is bundled to the next: one shared letter
-// travels down the same column, and the two connected tiles render as a
-// single 1x2 rectangle that arrives prefilled and locked.
+// One puzzle per day: the answer is derived from the calendar date and
+// progress is saved to localStorage, so a refresh resumes the same game
+// mid-board, exactly like real Wordle. A Practice mode plays random words
+// without touching the daily save.
+//
+// Each guess is bundled to the next: one shared letter travels down the same
+// column, and the two connected tiles render as a single 1x2 rectangle.
 (function () {
   "use strict";
 
@@ -11,7 +15,10 @@
   // 2nd, 4th, 3rd, 1st, then 5th letter.
   var CHAIN = [1, 3, 2, 0, 4];
   var PRAISE = ["Genius", "Magnificent", "Impressive", "Splendid", "Great", "Phew"];
-  var FLIP_STEP = 280;
+  var FLIP_STAGGER = 280; // ms between tile flips
+  var FLIP_MID = 270;     // half-turn point: the score color appears here
+  var STORE_KEY = "bundle-day1";
+  var GAME_URL = "https://suitangi.github.io/30Wordles/days/1";
 
   var ANSWERS = window.WORD_LISTS.answers;
   var DICTIONARY = new Set(window.WORD_LISTS.guesses);
@@ -28,6 +35,8 @@
   var done = false;
   var won = false;
   var revealing = false;
+  var practice = false;
+  var guesses = [];       // submitted guesses this game
   var letters = [];       // letters[r][c]
   var locked = [];        // locked[r][c] — carried tiles
   var tileEls = [];       // tileEls[r][c] — halves inside pairs for chain columns
@@ -35,14 +44,48 @@
   var keyEls = {};        // letter -> key button
   var toastTimer = null;
 
+  // ---------- daily puzzle ----------
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+
+  // Deterministic daily answer: same word for everyone, changes at midnight.
+  function answerFor(key) {
+    var h = 0;
+    for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return ANSWERS[h % ANSWERS.length];
+  }
+
+  function loadSaved() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)); }
+    catch (e) { return null; }
+  }
+
+  function saveState() {
+    if (practice) return;
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({
+        date: todayKey(),
+        answer: answer,
+        guesses: guesses,
+        done: done,
+        won: won
+      }));
+    } catch (e) { /* storage unavailable — game still playable */ }
+  }
+
   // ---------- setup ----------
 
-  function init() {
-    answer = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+  function resetBoard() {
     row = 0;
     done = false;
     won = false;
     revealing = false;
+    guesses = [];
     letters = [];
     locked = [];
     tileEls = [];
@@ -93,6 +136,74 @@
     }
 
     buildKeyboard();
+  }
+
+  // Today's puzzle: resume the saved game if there is one, else start fresh.
+  function init() {
+    practice = false;
+    newBtn.textContent = "Practice";
+    var key = todayKey();
+    var saved = loadSaved();
+    if (saved && saved.date === key && saved.answer && DICTIONARY.has(saved.answer)) {
+      answer = saved.answer;
+      resetBoard();
+      restore(saved);
+    } else {
+      answer = answerFor(key);
+      resetBoard();
+      saveState();
+    }
+  }
+
+  // Random word, never saved — the daily game stays untouched.
+  function startPractice() {
+    practice = true;
+    answer = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+    resetBoard();
+    newBtn.textContent = "Today\u2019s puzzle";
+    showBanner("Practice round");
+  }
+
+  // Replay saved guesses onto the fresh board, with no reveal animation.
+  function restore(saved) {
+    guesses = saved.guesses.slice();
+    for (var r = 0; r < guesses.length; r++) {
+      letters[r] = guesses[r].split("");
+      if (r > 0) {
+        var pc = CHAIN[r - 1];
+        letters[r][pc] = letters[r - 1][pc];
+        locked[r][pc] = true;
+      }
+      var marks = evaluate(guesses[r], answer);
+      for (var c = 0; c < COLS; c++) {
+        var t = tileEls[r][c];
+        t.textContent = letters[r][c];
+        t.classList.add(marks[c]);
+      }
+      for (var k = 0; k < COLS; k++) paintKey(letters[r][k], marks[k]);
+    }
+
+    if (saved.done || guesses.length >= ROWS) {
+      done = true;
+      won = !!saved.won;
+      row = guesses.length - 1;
+      for (var pi = 0; pi < ROWS - 1; pi++) setPairState(pi, "spent");
+      showBanner(won ? PRAISE[row] : "The word was " + answer.toUpperCase());
+      shareBtn.classList.remove("hidden");
+    } else {
+      row = guesses.length;
+      for (var pj = 0; pj < row - 1; pj++) setPairState(pj, "spent");
+      if (row > 0) {
+        var ac = CHAIN[row - 1];
+        var ch = letters[row - 1][ac];
+        letters[row][ac] = ch;
+        locked[row][ac] = true;
+        var at = tileEls[row][ac];
+        at.textContent = ch;
+        at.classList.add("carried");
+        setPairState(row - 1, "armed");
+      }
+    }
   }
 
   function buildKeyboard() {
@@ -162,20 +273,25 @@
     revealing = true;
     var rowIdx = row;
     var marks = evaluate(guess, answer);
+    // A rejected attempt leaves `shake` behind; equal specificity, defined
+    // after .reveal, it would override the flip — clear it first.
+    tileEls[rowIdx].forEach(function (t) { t.classList.remove("shake"); });
     marks.forEach(function (mark, c) {
+      var t = tileEls[rowIdx][c];
+      // Flip first; the score color lands at the half-turn, like Wordle.
+      setTimeout(function () { t.classList.add("reveal"); },
+        100 + c * FLIP_STAGGER);
       setTimeout(function () {
-        var tile = tileEls[rowIdx][c];
-        tile.classList.remove("filled", "carried");
-        tile.classList.add("reveal", mark);
-      }, FLIP_STEP + c * FLIP_STEP);
+        t.classList.remove("filled", "carried");
+        t.classList.add(mark);
+      }, 100 + c * FLIP_STAGGER + FLIP_MID);
     });
     setTimeout(function () { finish(rowIdx, marks); },
-      FLIP_STEP + COLS * FLIP_STEP + 120);
+      100 + (COLS - 1) * FLIP_STAGGER + FLIP_MID + 150);
   }
 
   // Standard Wordle evaluation: exact matches first, then stray letters.
-  function evaluate(guess, target) {
-    var marks = Array(COLS).fill("absent");
+  function evaluate(guess, target) {    var marks = Array(COLS).fill("absent");
     var remaining = {};
     for (var i = 0; i < COLS; i++) {
       if (guess[i] === target[i]) marks[i] = "correct";
@@ -196,23 +312,22 @@
     // The lower half of the rectangle above this row just got scored.
     if (rowIdx > 0) setPairState(rowIdx - 1, "spent");
 
+    guesses.push(letters[rowIdx].join(""));
+
     if (letters[rowIdx].join("") === answer) {
       done = true;
       won = true;
       showBanner(PRAISE[rowIdx]);
       shareBtn.classList.remove("hidden");
-      revealing = false;
-      return;
-    }
-    if (rowIdx === ROWS - 1) {
+    } else if (rowIdx === ROWS - 1) {
       done = true;
       showBanner("The word was " + answer.toUpperCase());
       shareBtn.classList.remove("hidden");
-      revealing = false;
-      return;
+    } else {
+      carry(rowIdx);
+      row = rowIdx + 1;
     }
-    carry(rowIdx);
-    row = rowIdx + 1;
+    saveState();
     revealing = false;
   }
 
@@ -262,6 +377,12 @@
       t.classList.remove("shake");
       void t.offsetWidth; // restart the animation
       t.classList.add("shake");
+      // Drop the class once played, or it overrides the later flip animation.
+      t.addEventListener("animationend", function h(ev) {
+        if (ev.animationName !== "shake") return;
+        t.removeEventListener("animationend", h);
+        t.classList.remove("shake");
+      });
     });
   }
 
@@ -279,7 +400,9 @@
   function share() {
     var emptyCell = document.documentElement.dataset.theme === "dark" ? "\u2B1B" : "\u2B1C";
     var EMOJI = { correct: "\uD83D\uDFE9", present: "\uD83D\uDFE8", absent: emptyCell };
-    var lines = ["Bundle (Day 1) " + (won ? row + 1 : "X") + "/6"];
+    var title = ["Bundle", practice ? "practice" : todayKey(),
+      (won ? row + 1 : "X") + "/6"].join(" \u00B7 ");
+    var lines = [title, GAME_URL];
     for (var r = 0; r < ROWS; r++) {
       if (!letters[r].some(Boolean)) break;
       lines.push(letters[r].map(function (ch, c) {
@@ -325,8 +448,18 @@
     else if (e.key === "Enter" || e.key === "Backspace") onKey(e.key);
   });
 
-  newBtn.addEventListener("click", init);
+  newBtn.addEventListener("click", function () {
+    if (practice) init(); else startPractice();
+  });
   shareBtn.addEventListener("click", share);
 
   init();
+
+  // Small console/test surface.
+  window.BUNDLE = {
+    daily: init,
+    practice: startPractice,
+    todayKey: todayKey,
+    answerFor: answerFor
+  };
 })();

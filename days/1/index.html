@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <title>Day 1 · Bundle — 30 Wordles</title>
+  <link rel="stylesheet" href="../../css/styles.css">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem("30wordles-theme"); } catch (e) {}
+      if (t !== "dark" && t !== "light") {
+        t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="wordmark" href="../../index.html">30 <span>Wordles</span></a>
+    <button class="theme-toggle" type="button" aria-label="Toggle color theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </header>
+
+  <main class="page narrow">
+    <p class="eyebrow">Day 1</p>
+    <h1>Bundle</h1>
+    <p class="lede">Every guess bundles one letter into the next.</p>
+
+    <section class="rules">
+      <h2>Rules</h2>
+      <ul>
+        <li>Six guesses, five-letter words, standard Wordle colors — everything else is plain Wordle.</li>
+        <li>Each guess is tied to the next by one bundled letter. The two connected tiles are shown as a single tile and the latter is locked to the letter of the guess before.</li>
+      </ul>
+    </section>
+
+    <div class="game">
+      <div class="board" id="board" aria-label="Bundle board"></div>
+      <div class="game-banner" id="banner" role="status"></div>
+      <div class="game-actions">
+        <button class="btn" id="new-btn" type="button">Practice</button>
+        <button class="btn primary hidden" id="share-btn" type="button">Share result</button>
+      </div>
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">30Wordle</footer>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="../../js/words.js"></script>
+  <script src="../../js/bundle.js"></script>
+  <script src="../../js/theme.js"></script>
+</body>
+</html>

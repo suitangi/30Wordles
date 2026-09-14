@@ -6,11 +6,14 @@ Each day is its own subpage and grows into its own playable variant.
 ## Structure
 
 - `index.html` — project home with the Day 1–30 list
-- `days/day-N.html` — one subpage per day (Day 1 is **Bundle**)
+- `days/N/index.html` — one folder per day (Day 1 is **Bundle**), served at
+  `…/30Wordles/days/N/`
 - `css/styles.css` — shared styles, dark/light themes
 - `js/theme.js` — theme toggle (persists choice, defaults to OS preference)
-- `js/bundle.js` — Day 1 game logic
+- `js/bundle.js` — Day 1 game logic: one date-derived puzzle per day, progress
+  saved to `localStorage` (key `bundle-day1`), plus an unsaved Practice mode
 - `tests/bundle.test.js` — headless game tests (`node tests/bundle.test.js`)
+- `favicon.svg` — 30/W tile mark
 - `js/words.js` — bundled word lists (`window.WORD_LISTS`): answers (2,315) from
   [cfreshman/wordle-answers-alphabetical](https://gist.github.com/cfreshman/a03ef2cba789d8cf00c08f767e0fad7b),
   allowed guesses (14,855) from
