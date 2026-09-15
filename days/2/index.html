@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-  <title>Day 2 — 30 Wordles</title>
+  <title>Day 2 · Subtle — 30 Wordles</title>
   <link rel="stylesheet" href="../../css/styles.css">
   <script>
     (function () {
@@ -17,7 +17,7 @@
     })();
   </script>
 </head>
-<body>
+<body class="subtle">
 
   <header class="site-header">
     <a class="wordmark" href="../../index.html">30 <span>Wordles</span></a>
@@ -29,13 +29,36 @@
 
   <main class="page narrow">
     <p class="eyebrow">Day 2</p>
-    <h1>Nothing yet</h1>
-    <p class="lede">Day 2 hasn’t happened yet. When it does, the game lands here.</p>
-    <p><a href="../../index.html">&larr; All days</a></p>
+    <h1>Subtle</h1>
+    <p class="lede">Every guess scores its closeness to the answer out of 100.</p>
+
+    <section class="rules">
+      <h2>Rules</h2>
+      <ul>
+        <li>Five-letter words with unlimited guesses. The score on the right of each shows how close you are to the answer.</li>
+        <li>Score ranges from 0–100. 13 points per letter in its exact spot, 6 for a right letter gone astray, and up to 40 for edit distance.</li>
+        <li>The board keeps every guess and grows until you find the word.</li>
+      </ul>
+    </section>
+
+    <div class="game subtle-game">
+      <div class="rows" id="board" aria-label="Subtle board"></div>
+      <div class="game-banner" id="banner" role="status"></div>
+      <div class="game-actions">
+        <button class="btn" id="new-btn" type="button">Practice</button>
+        <button class="btn" id="giveup-btn" type="button">Give up</button>
+        <button class="btn primary hidden" id="share-btn" type="button">Share result</button>
+      </div>
+      <div class="keyboard" id="keyboard"></div>
+    </div>
   </main>
 
-  <footer class="site-footer">30Wordle</footer>
+  <footer class="site-footer">30Wordle: Made with 💙 by Suitangi</footer>
 
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="../../js/words.js"></script>
+  <script src="../../js/subtle.js"></script>
   <script src="../../js/theme.js"></script>
 </body>
 </html>

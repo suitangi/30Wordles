@@ -306,6 +306,113 @@ h1 {
 .pair .tile.filled { background: var(--hover); }
 .pair .tile.carried { background: var(--accent-soft); }
 
+/* ---------- Subtle board (Day 2) ---------- */
+
+/* Page-scoped accent: a violet that actually reads as violet. Root
+   --accent stays Bundle's water blue. The score colorizes from quiet gray
+   to saturated violet as it climbs — the number itself is the feedback, so
+   nothing ever paints over it. */
+body.subtle {
+  --accent: #6c5ce7;
+  --accent-soft: rgba(108, 92, 231, 0.16);
+  --score-hi: #5b46e8;
+  --score-on: #ffffff;
+  --score-grad-a: #e7e1fd;
+  --score-grad-b: #c7b9f9;
+  background-color: var(--bg);
+  background-image: radial-gradient(900px 420px at 50% -6%,
+    var(--accent-soft), transparent 70%);
+}
+[data-theme="dark"] body.subtle {
+  --accent: #9d8dfd;
+  --accent-soft: rgba(157, 141, 253, 0.2);
+  --score-hi: #b4a3ff;
+  --score-on: #121213;
+  --score-grad-a: #3a3178;
+  --score-grad-b: #5346ab;
+}
+
+/* No tile outlines here — letters and the score carry the board alone. */
+body.subtle .tile { border: none; }
+
+/* Keys tint with the share of all earned score their letter accounts for
+   (inline --m, 0-1, set by subtle.js): unused keys stay plain, any use
+   tints 30% at once so used vs unused reads instantly, then scales with
+   the letter's share up to full saturation. Quiet, and very much on
+   purpose. */
+body.subtle .key {
+  background: var(--key-bg);
+  background: color-mix(in oklab, var(--score-hi) calc(var(--m, 0) * 100%),
+    var(--key-bg));
+  color: var(--key-text);
+  color: color-mix(in oklab, var(--score-on) calc(var(--m, 0) * 100%),
+    var(--key-text));
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.subtle-game { max-width: 380px; }
+
+/* The board is a fixed window holding ~6 rows; guesses fill it from the top
+   and it scrolls once they outgrow it, old rows fading under the top edge. */
+.rows {
+  width: 100%;
+  height: min(372px, 62vh);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.rows::-webkit-scrollbar { display: none; }
+.rows.overflowing {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+}
+
+.srow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 56px;
+  gap: 5px;
+  animation: row-rise 0.3s ease both;
+}
+@keyframes row-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+/* Restored rows carry `quiet` permanently: no enter animation, no color
+   sweep — the board paints finished, not animated. */
+.srow.quiet { animation: none; }
+.srow.quiet .score { transition: none; }
+
+/* The score: just a bold number, colorized from quiet gray to saturated
+   violet via --w (0-1). Text only — no surface, so nothing can cover it. */
+.score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  color: color-mix(in oklab, var(--score-hi) calc(var(--w, 0) * 100%),
+    var(--muted));
+  transition: color 0.6s ease;
+  user-select: none;
+}
+.score.settle { animation: settle 0.45s ease; }
+@keyframes settle {
+  from { opacity: 0.3; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.srow.win .tile {
+  background: linear-gradient(120deg, var(--score-grad-a), var(--score-grad-b));
+  border-color: transparent;
+}
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
@@ -408,6 +515,7 @@ h1 {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+  .rows { scroll-behavior: auto; }
 }
 
 @media (max-width: 480px) {
