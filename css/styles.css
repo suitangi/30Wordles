@@ -23,6 +23,10 @@
   /* Bundle accent — carried letters */
   --accent: #1273b5;
   --accent-soft: rgba(18, 115, 181, 0.09);
+
+  /* Colorblind (high-contrast) mark palette, Wordle's orange/blue */
+  --cb-correct: #f5793a;
+  --cb-present: #85c0f9;
 }
 
 [data-theme="dark"] {
@@ -89,7 +93,10 @@ a:hover { text-decoration: underline; }
 .wordmark span { color: var(--muted); font-weight: 500; }
 .wordmark:hover { text-decoration: none; color: var(--accent); }
 
-.theme-toggle {
+/* Round header buttons. NOTE: `.theme-toggle` is theme.js's binding hook
+   (it queries that class) — style round header buttons with .circle-btn
+   and never add .theme-toggle to any other button. */
+.circle-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -102,11 +109,31 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
-.theme-toggle:hover { color: var(--text); border-color: var(--muted); }
-.theme-toggle svg { width: 17px; height: 17px; }
+.circle-btn:hover { color: var(--text); border-color: var(--muted); }
+.circle-btn svg { width: 17px; height: 17px; }
 .icon-moon { display: none; }
 [data-theme="dark"] .icon-sun { display: none; }
 [data-theme="dark"] .icon-moon { display: block; }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.circle-btn[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.circle-btn[aria-pressed="true"]:hover { opacity: 0.85; }
+
+/* Colorblind mode: marks swap green/yellow for orange/blue everywhere they
+   carry meaning (tiles, keyboard, strips). */
+[data-colorblind="on"] .tile.correct { background: var(--cb-correct); border-color: var(--cb-correct); }
+[data-colorblind="on"] .tile.present { background: var(--cb-present); border-color: var(--cb-present); }
+[data-colorblind="on"] .key.correct { background: var(--cb-correct); }
+[data-colorblind="on"] .key.present { background: var(--cb-present); }
+[data-colorblind="on"] .strip .slot.known { background: var(--cb-correct); border-color: var(--cb-correct); }
 
 .site-footer {
   max-width: 960px;
@@ -412,6 +439,75 @@ body.subtle .key {
   background: linear-gradient(120deg, var(--score-grad-a), var(--score-grad-b));
   border-color: transparent;
 }
+
+/* ---------- Wobble board (Day 3) ---------- */
+
+/* Page-scoped accent: warm amber. Root --accent stays Bundle's water blue. */
+body.wobble {
+  --accent: #a35a00;
+  --accent-soft: rgba(163, 90, 0, 0.12);
+}
+[data-theme="dark"] body.wobble {
+  --accent: #f2a33c;
+  --accent-soft: rgba(242, 163, 60, 0.16);
+}
+
+.wobble-game { max-width: 350px; }
+
+/* The title wobbles too: every other letter dips a little. */
+.wobble-title span {
+  display: inline-block;
+  transform: translateY(0.12em);
+}
+
+/* Staggered brick rows: probes are 4 tiles riding columns 1-4 or, shifted
+   one full column right, columns 2-5. The shift is a transform (not a
+   margin — margins would shrink the row and with it every tile's
+   percentage width), so tiles are identical in both layouts and the
+   wobble still animates. */
+.wobble-board {
+  --wgap: 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wgap);
+}
+
+.wrow {
+  display: flex;
+  gap: var(--wgap);
+  transition: transform 0.25s ease;
+  /* Entrance animates opacity only — a transform keyframe with fill:both
+     would override .wrow.even's translateX forever. */
+  animation: wrow-in 0.3s ease both;
+}
+@keyframes wrow-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.wrow.even { transform: translateX(calc((100% + var(--wgap)) / 5)); }
+.wrow.quiet { animation: none; }
+
+.wrow .tile {
+  width: calc((100% - 4 * var(--wgap)) / 5);
+  border-color: transparent;
+}
+.wrow .tile.inplay { border-color: var(--tile-border); }
+.wrow .tile.filled { border-color: var(--tile-border-filled); }
+.wrow.scored .tile { border-color: transparent; }
+
+/* The clock: which guess it is, and when the commit is due. */
+.turnline {
+  margin-top: 12px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.turnline.final { color: var(--correct); }
 
 /* ---------- Keyboard ---------- */
 

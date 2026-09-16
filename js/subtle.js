@@ -243,7 +243,7 @@
         btn.className = "key" + (k.length > 1 ? " wide" : "");
         btn.textContent = k === "Backspace" ? "\u232B" : k;
         btn.setAttribute("aria-label", k);
-        btn.addEventListener("click", function () { onKey(k); });
+        btn.addEventListener("click", function () { onKey(k); btn.blur(); });
         rowEl.appendChild(btn);
         if (k.length === 1) keyEls[k] = btn;
       });
@@ -468,16 +468,21 @@
   window.addEventListener("keydown", function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (/^[a-zA-Z]$/.test(e.key)) onKey(e.key.toLowerCase());
-    else if (e.key === "Enter" || e.key === "Backspace") onKey(e.key);
+    else if (e.key === "Enter" || e.key === "Backspace") {
+      // Never double-fire while a button holds focus: the browser will
+      // activate it too (clicking Practice mid-game, retyping a key).
+      if (!e.target || e.target.tagName !== "BUTTON") onKey(e.key);
+    }
   });
 
   window.addEventListener("resize", function () { settleScroll(true); });
 
   newBtn.addEventListener("click", function () {
+    newBtn.blur();
     if (practice) init(); else startPractice();
   });
   giveUpBtn.addEventListener("click", giveUp);
-  shareBtn.addEventListener("click", share);
+  shareBtn.addEventListener("click", function () { shareBtn.blur(); share(); });
 
   init();
 

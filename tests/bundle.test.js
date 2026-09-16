@@ -37,6 +37,7 @@ function makeEl(tag) {
     setAttribute() {},
     select() {},
     remove() {},
+    blur() {},
     click() { (this._handlers.click || []).forEach((fn) => fn()); },
   };
   const classes = new Set();
