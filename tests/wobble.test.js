@@ -341,7 +341,7 @@ const fillers = ["near", "rent", "sees", "tear", "east", "read", "area"];
 for (const w of fillers) typeWord(w);
 assert.equal(board.children.length, 8, "seven scored rows + turn-8 row");
 assert.ok(turnline.classList.contains("final"), "turnline flags the forced commit");
-assert.equal(turnline.textContent, "Guess 8 of 8 — commit only", "turn 8 announced");
+assert.equal(turnline.textContent, "Guess 8 of 8 \u2014 answer only", "turn 8 announced");
 
 typeWord("rent"); // a 4-letter probe must be refused now
 assert.equal(toast.textContent, "Turn 8 is commit only", "probe rejected on turn 8");

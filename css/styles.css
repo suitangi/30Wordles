@@ -251,6 +251,16 @@ h1 {
 
 /* ---------- Bundle board ---------- */
 
+/* The title bundles its own pair: "un" rides inside a bundle rectangle
+   (dashed like a chain preview, accent like the in-game pairs). */
+.bundle-title .pairbox {
+  display: inline-block;
+  border: 2px dashed var(--accent);
+  border-radius: 8px;
+  padding: 0 0.1em;
+  margin: 0 0.06em;
+}
+
 .game {
   max-width: 350px;
   margin: 0 auto;
@@ -334,6 +344,25 @@ h1 {
 .pair .tile.carried { background: var(--accent-soft); }
 
 /* ---------- Subtle board (Day 2) ---------- */
+
+/* The title practices what the game preaches: it fades out left to right —
+   solid until "b", then dimming through "tle" until the final e sits at
+   about half strength. */
+.fade-title {
+  /* background-clip: text clips the paint to the glyphs, but the gradient's
+     % stops still map to the element box — a full-width h1 would park the
+     whole word inside the solid 0–40% zone and the fade would happen in
+     empty space. Shrink the box to the word. */
+  width: fit-content;
+  /* Fallback first: a plain fade for engines without color-mix. */
+  background-image: linear-gradient(90deg, var(--text) 40%, transparent 100%);
+  background-image: linear-gradient(90deg, var(--text) 40%,
+    color-mix(in srgb, var(--text) 45%, transparent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 
 /* Page-scoped accent: a violet that actually reads as violet. Root
    --accent stays Bundle's water blue. The score colorizes from quiet gray
@@ -508,6 +537,167 @@ body.wobble {
   color: var(--muted);
 }
 .turnline.final { color: var(--correct); }
+
+/* ---------- Toggle board (Day 4) ---------- */
+
+/* Page-scoped accent: teal. Root --accent stays Bundle's water blue. */
+body.toggle {
+  --accent: #0f766e;
+  --accent-soft: rgba(15, 118, 110, 0.12);
+  --score-hi: #0d9488;
+}
+[data-theme="dark"] body.toggle {
+  --accent: #2dd4bf;
+  --accent-soft: rgba(45, 212, 191, 0.14);
+  --score-hi: #5eead4;
+}
+
+.toggle-game { max-width: 350px; }
+
+/* The title: one toggle stands in for both g's — the pill reads as two
+   circles side by side, and two little tails echo the double descender.
+   Click it: the knob slides. */
+.toggle-title .tg {
+  display: inline-block;
+  position: relative;
+  width: 1.24em;
+  height: 0.74em;
+  margin: 0 0.05em;
+  cursor: pointer;
+}
+.toggle-title .tg .pill {
+  position: absolute;
+  top: 0.1em;
+  left: 0.1em;
+  width: 1.1em;
+  height: 0.4em;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.toggle-title .tg .pill::after {
+  content: "";
+  position: absolute;
+  top: 0.05em;
+  left: 0.05em;
+  width: 0.3em;
+  height: 0.3em;
+  border-radius: 50%;
+  background: var(--bg);
+  transition: left 0.2s ease;
+}
+.toggle-title .tg .pill.on::after { left: calc(100% - 0.35em); }
+.toggle-title .tg .tail {
+  position: absolute;
+  top: 0.44em;
+  width: 0.38em;
+  height: 0.32em;
+  border: 0.055em solid var(--text);
+  border-top: none;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 0 0 80% 80% / 0 0 100% 100%;
+}
+.toggle-title .tg .tail.a { left: 0.12em; }
+.toggle-title .tg .tail.b { left: 0.72em; }
+.toggle-title .sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.toggle-board {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  animation: row-rise 0.3s ease both;
+}
+.trow.quiet { animation: none; }
+
+/* The toggle: a minimal pill with a circular middle. State lives in
+   aria-pressed (and .on); the knob travels via `left` so it works at any
+   tile width. */
+.trow .tog {
+  flex: 1;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  position: relative;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.trow .tog::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: left 0.2s ease, background-color 0.2s ease;
+}
+.trow .tog[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.trow .tog[aria-pressed="true"]::after {
+  left: calc(100% - 27px);
+  background: var(--bg);
+}
+.trow .tog:disabled { cursor: default; }
+.trow.scored .tog:disabled { opacity: 0.85; }
+.trow .score { flex: none; width: 56px; height: 32px; }
+
+/* The loss reveal: "Out of guesses" with the answer as small view-only
+   toggles, right under the text inside the banner. */
+.banner-pattern {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.banner-pattern .tog {
+  width: 40px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  position: relative;
+  display: inline-block;
+}
+.banner-pattern .tog::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: left 0.2s ease, background-color 0.2s ease;
+}
+.banner-pattern .tog[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.banner-pattern .tog[aria-pressed="true"]::after {
+  left: calc(100% - 16px);
+  background: var(--bg);
+}
 
 /* ---------- Keyboard ---------- */
 
