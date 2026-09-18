@@ -249,6 +249,59 @@ h1 {
   padding: 1px 6px;
 }
 
+/* ---------- Day nav & coming soon ---------- */
+
+/* Every day page ends with a symmetric prev/next pair; the edge days keep
+   an invisible ghost so the row stays balanced. Unreleased days are real
+   pages too — the nav chains through them. */
+.day-nav {
+  margin-top: 44px;
+  display: flex;
+  gap: 10px;
+}
+.day-nav a,
+.day-nav .ghost {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.day-nav a:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+.day-nav a:last-child { justify-content: flex-end; }
+.day-nav .arrow { font-weight: 700; }
+.day-nav .ghost { visibility: hidden; }
+
+/* Coming-soon pages: five empty tiles waiting, breathing softly in turn.
+   (prefers-reduced-motion flattens this along with everything else.) */
+.soon-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  max-width: 350px;
+  margin: 34px auto 0;
+}
+.soon-tiles .tile { animation: soon-pulse 2.8s ease-in-out infinite; }
+.soon-tiles .tile:nth-child(2) { animation-delay: 0.35s; }
+.soon-tiles .tile:nth-child(3) { animation-delay: 0.7s; }
+.soon-tiles .tile:nth-child(4) { animation-delay: 1.05s; }
+.soon-tiles .tile:nth-child(5) { animation-delay: 1.4s; }
+@keyframes soon-pulse {
+  0%, 100% { border-color: var(--tile-border); }
+  50% { border-color: var(--tile-border-filled); }
+}
+
 /* ---------- Bundle board ---------- */
 
 /* The title bundles its own pair: "un" rides inside a bundle rectangle
@@ -698,6 +751,58 @@ body.toggle {
   left: calc(100% - 16px);
   background: var(--bg);
 }
+
+/* ---------- Meddle board (Day 5) ---------- */
+
+/* Page-scoped accent: rose. Root --accent stays Bundle's water blue. */
+body.meddle {
+  --accent: #be185d;
+  --accent-soft: rgba(190, 24, 93, 0.1);
+}
+[data-theme="dark"] body.meddle {
+  --accent: #f472b6;
+  --accent-soft: rgba(244, 114, 182, 0.16);
+}
+
+.meddle-game { max-width: 350px; }
+
+/* The title double-exposes itself: two ghost copies of the word sit behind
+   it, misregistered left and right — two words meddling in one board, one
+   title. */
+.meddle-title {
+  position: relative;
+  z-index: 0;
+}
+.meddle-title::before,
+.meddle-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  user-select: none;
+  pointer-events: none;
+}
+.meddle-title::before {
+  transform: translate(-0.15em, 0.025em);
+  color: var(--accent);
+  opacity: 0.4;
+}
+.meddle-title::after {
+  transform: translate(0.15em, -0.025em);
+  color: var(--text);
+  opacity: 0.18;
+}
+
+/* Standard bordered Wordle tiles, but rows grow on demand inside the same
+   scroll window Subtle uses. Entrance animates opacity only. */
+.mrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.mrow.quiet { animation: none; }
 
 /* ---------- Keyboard ---------- */
 
