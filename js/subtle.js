@@ -43,25 +43,10 @@
 
   // ---------- scoring ----------
 
-  function editDistance(a, b) {
-    var prev = [0, 1, 2, 3, 4, 5];
-    var cur = [0, 0, 0, 0, 0, 0];
-    for (var i = 1; i <= COLS; i++) {
-      cur[0] = i;
-      for (var j = 1; j <= COLS; j++) {
-        var sub = prev[j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1);
-        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, sub);
-      }
-      var t = prev; prev = cur; cur = t;
-    }
-    return prev[COLS];
-  }
-
-  // 0-100: 13 per letter in the exact spot, 6 per right letter gone astray,
-  // up to 40 for edit-distance closeness (8 per step). The three signals mix
-  // into ~25 distinct values, so small changes move the number in small
-  // steps — and only the answer itself reaches 100 (a one-letter miss, 4
-  // greens + distance 1, tops out at 84).
+  // 0-100: 20 per letter in the exact spot, 10 per right letter gone astray.
+  // (Astray = the overlap of the non-green letters, counted order-free so
+  // the score stays symmetric.) Steps of 10, quiet and legible; only the
+  // answer itself reaches 100 — a one-letter miss tops out at 80.
   function scoreFor(guess, target) {
     if (guess === target) return 100;
     var right = 0;
@@ -78,12 +63,10 @@
         targetLeft[t] = (targetLeft[t] || 0) + 1;
       }
     }
-    // Right letters gone astray: the overlap of the non-green letters, counted
-    // order-free so the score stays symmetric.
     for (var ch in guessLeft) {
       if (targetLeft[ch]) astray += Math.min(guessLeft[ch], targetLeft[ch]);
     }
-    return 13 * right + 6 * astray + 8 * (COLS - editDistance(guess, target));
+    return 20 * right + 10 * astray;
   }
 
   // ---------- daily puzzle ----------

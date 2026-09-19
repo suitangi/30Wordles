@@ -804,6 +804,237 @@ body.meddle {
 }
 .mrow.quiet { animation: none; }
 
+/* ---------- Crumble board (Day 6) ---------- */
+
+/* Page-scoped accent: terracotta dust. Root --accent stays Bundle's water
+   blue. */
+body.crumble {
+  --accent: #a34721;
+  --accent-soft: rgba(163, 71, 33, 0.12);
+}
+[data-theme="dark"] body.crumble {
+  --accent: #f0926b;
+  --accent-soft: rgba(240, 146, 107, 0.16);
+}
+
+.crumble-game { max-width: 350px; }
+
+/* The title is Thanos-snapped: the bottom half of the word disintegrates.
+   The h1's own paint carries only the top half (background clipped to the
+   glyphs and cut at the midline — same box-vs-glyph gotcha as .fade-title,
+   so the box shrinks to the word); ::after is the bottom half as a dust
+   copy whose speckle holes grow via an animated @property while it sags
+   and drifts, settling half-gone — frozen mid-snap; ::before is a pinch of
+   motes lifting off it. Plays once on load, then rests. Without @property
+   the holes never grow and the word simply stays whole. */
+.crumble-title {
+  position: relative;
+  width: fit-content;
+  background-image: linear-gradient(180deg, var(--text) 55%, transparent 55%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+/* Three registered properties grow at their own rates, so the erosion is
+   progressive and uneven — one uniform hole size is what made the old
+   version read as halftone dots. */
+@property --d1 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --d2 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+@property --d3 {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+.crumble-title::before,
+.crumble-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  pointer-events: none;
+  user-select: none;
+}
+/* The disintegrating half: three coprime mask tiles (large pocks, medium
+   pits, fine grit) with soft-feathered holes and slowly drifting positions
+   — irregular enough to read as erosion, not a halftone grid. */
+.crumble-title::after {
+  clip-path: inset(52% 0 0 0);
+  -webkit-mask-image:
+    radial-gradient(ellipse 55% 45% at 30% 30%,
+      transparent var(--d1), #000 calc(var(--d1) + 2.5px)),
+    radial-gradient(ellipse 40% 60% at 68% 62%,
+      transparent var(--d2), #000 calc(var(--d2) + 2px)),
+    radial-gradient(ellipse 32% 45% at 52% 78%,
+      transparent var(--d3), #000 calc(var(--d3) + 1.5px));
+  mask-image:
+    radial-gradient(ellipse 55% 45% at 30% 30%,
+      transparent var(--d1), #000 calc(var(--d1) + 2.5px)),
+    radial-gradient(ellipse 40% 60% at 68% 62%,
+      transparent var(--d2), #000 calc(var(--d2) + 2px)),
+    radial-gradient(ellipse 32% 45% at 52% 78%,
+      transparent var(--d3), #000 calc(var(--d3) + 1.5px));
+  -webkit-mask-size: 9px 7px, 6px 10px, 4px 5px;
+  mask-size: 9px 7px, 6px 10px, 4px 5px;
+  -webkit-mask-position: 1px 2px, 3px 5px, 0 0;
+  mask-position: 1px 2px, 3px 5px, 0 0;
+  animation: title-dust 2.6s ease-in 0.8s both;
+}
+@keyframes title-dust {
+  0% {
+    --d1: 0%; --d2: 0%; --d3: 0%; opacity: 1; transform: none;
+    -webkit-mask-position: 1px 2px, 3px 5px, 0 0;
+    mask-position: 1px 2px, 3px 5px, 0 0;
+  }
+  /* erosion front-runs the fade: most of the eating is done by 40%, the
+     back half just sags and dims the leftover grit */
+  40% {
+    --d1: 36%; --d2: 42%; --d3: 50%; opacity: 1;
+  }
+  100% {
+    --d1: 46%; --d2: 52%; --d3: 60%; opacity: 0.55;
+    transform: translate(0.04em, 0.08em);
+    -webkit-mask-position: 3px 5px, 1px 8px, 2px 4px;
+    mask-position: 3px 5px, 1px 8px, 2px 4px;
+  }
+}
+.crumble-title::before {
+  clip-path: inset(48% 0 0 0);
+  -webkit-mask-image:
+    radial-gradient(circle, #000 0.7px, transparent 1.2px),
+    radial-gradient(circle, #000 0.6px, transparent 1px);
+  mask-image:
+    radial-gradient(circle, #000 0.7px, transparent 1.2px),
+    radial-gradient(circle, #000 0.6px, transparent 1px);
+  -webkit-mask-size: 9px 11px, 13px 9px;
+  mask-size: 9px 11px, 13px 9px;
+  -webkit-mask-position: 0 0, 4px 6px;
+  mask-position: 0 0, 4px 6px;
+  opacity: 0;
+  animation: title-motes 2.4s ease-out 1s both;
+}
+@keyframes title-motes {
+  0% { opacity: 0; transform: none; }
+  30% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(0.14em, -0.12em); }
+}
+
+/* The well: a Tetris shaft, 5 wide. The queue slot waits at the top;
+   the pile grows from the floor, and ghost cells sketch the empty shaft.
+   The shaft starts deep enough for 6 visible rows and extends upward as
+   the pile grows (JS sets its height in px — rows are square). */
+.well {
+  width: 100%;
+  padding: 5px;
+  border: 2px solid var(--tile-border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+.well.done .queue { visibility: hidden; }
+
+.queue {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+/* Pile tiles and ghost cells share one positioning system: bottom-left
+   origin, --c columns across, --r rows up. The transform percentages are
+   relative to the tile itself, so (100% + gap) is exactly one column/row
+   pitch at any well width. */
+.shaft { position: relative; width: 100%; }
+
+.ghosts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ghosts .cell {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc((100% - 20px) / 5);
+  aspect-ratio: 1;
+  border: 2px solid var(--tile-border);
+  border-radius: 3px;
+  opacity: 0.4;
+  transform: translate(calc(var(--c) * (100% + 5px)),
+    calc(var(--r) * (-100% - 5px)));
+}
+
+.pile-tile {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc((100% - 20px) / 5);
+  z-index: 1;
+  transform: translate(calc(var(--c) * (100% + 5px)),
+    calc(var(--r) * (-100% - 5px)));
+  transition: transform var(--td, 0ms) var(--ease, ease);
+}
+/* The crumble: the tile ERODES instead of breaking — the same organic
+   three-scale speckle mask as the title eats bg, border and letter alike
+   while the tile sags and fades (no halves, no slices, no --ck needed:
+   the mask dissolves whatever mark the tile carries, colorblind modes
+   included). Cancelling yellows share it. */
+.pile-tile.crumble,
+.pile-tile.cancel {
+  -webkit-mask-image:
+    radial-gradient(ellipse 55% 45% at 30% 30%,
+      transparent var(--d1), #000 calc(var(--d1) + 2px)),
+    radial-gradient(ellipse 40% 60% at 68% 62%,
+      transparent var(--d2), #000 calc(var(--d2) + 1.5px)),
+    radial-gradient(ellipse 32% 45% at 52% 78%,
+      transparent var(--d3), #000 calc(var(--d3) + 1px));
+  mask-image:
+    radial-gradient(ellipse 55% 45% at 30% 30%,
+      transparent var(--d1), #000 calc(var(--d1) + 2px)),
+    radial-gradient(ellipse 40% 60% at 68% 62%,
+      transparent var(--d2), #000 calc(var(--d2) + 1.5px)),
+    radial-gradient(ellipse 32% 45% at 52% 78%,
+      transparent var(--d3), #000 calc(var(--d3) + 1px));
+  -webkit-mask-size: 8px 6px, 5px 9px, 4px 4px;
+  mask-size: 8px 6px, 5px 9px, 4px 4px;
+  animation: tile-crumble 0.6s ease-in forwards;
+}
+/* Erosion front-runs the fade: the tile is mostly eaten by halfway, and
+   the opacity only winks out at the end — otherwise it reads as a noisy
+   fade instead of being eaten. */
+@keyframes tile-crumble {
+  0% {
+    --d1: 0%; --d2: 0%; --d3: 0%; opacity: 1;
+    transform: translate(calc(var(--c) * (100% + 5px)),
+      calc(var(--r) * (-100% - 5px)));
+  }
+  50% {
+    --d1: 50%; --d2: 56%; --d3: 64%; opacity: 0.85;
+    transform: translate(calc(var(--c) * (100% + 5px)),
+      calc(var(--r) * (-100% - 5px) + 18%));
+  }
+  100% {
+    --d1: 66%; --d2: 72%; --d3: 80%; opacity: 0;
+    transform: translate(calc(var(--c) * (100% + 5px)),
+      calc(var(--r) * (-100% - 5px) + 45%));
+  }
+}
+
+/* The assembled answer: one settled row reading the word left to right. */
+.pile-tile.winline { animation: win-glow 1.6s ease 0.4s; }
+@keyframes win-glow {
+  0%, 100% { box-shadow: none; }
+  40% { box-shadow: 0 0 18px var(--accent-soft); }
+}
 /* ---------- Keyboard ---------- */
 
 .keyboard {

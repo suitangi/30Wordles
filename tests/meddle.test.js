@@ -236,6 +236,7 @@ for (let c = 0; c < 5; c++) {
 }
 assert.ok(!giveUpBtn.classList.contains("hidden"), "give up offered on a fresh board");
 assert.ok(shareBtn.classList.contains("hidden"), "no share before an end state");
+assert.equal(banner.textContent, "Two words to find", "fresh board announces its progress");
 
 const freshSave = readSave();
 assert.equal(freshSave.date, MEDDLE.todayKey(), "save stamped with today");
@@ -300,6 +301,8 @@ typeRow("crane");
 assertRowMarks(2, "crane", ["correct", "correct", "correct", "correct", "correct"]);
 assert.equal(banner.textContent, "One down \u2014 one to go", "first find announced");
 assert.ok(!giveUpBtn.classList.contains("hidden"), "game still open with one word left");
+assert.ok(keyFor("n").classList.contains("correct"),
+  "keyboard paints normally: n green from the find");
 
 // crane is found: the same word again now scores against cramp alone.
 typeRow("crane");
@@ -307,6 +310,8 @@ assertRowMarks(3, "crane", evalWord("crane", "cramp"));
 assert.ok(!tile(3, 3).classList.contains("correct"),
   "found word no longer meddles: n scores gray vs cramp");
 assert.equal(banner.textContent, "One down \u2014 one to go", "no re-find of a found word");
+// the keyboard never downgrades: n keeps its green even though cramp has no n
+assert.ok(keyFor("n").classList.contains("correct"), "keyboard keeps the best hint so far");
 
 // ---------- 8. finding both: the win ----------
 
@@ -349,7 +354,7 @@ assert.equal(board.children.length, 2, "scored row + waiting row");
 assertRowMarks(0, "brain",
   mergeMarks(evalWord("brain", "crane"), evalWord("brain", "cramp")));
 assert.ok(rowEl(0).classList.contains("quiet"), "restored row skips the entrance animation");
-assert.equal(banner.textContent, "", "mid-game board restores with no banner");
+assert.equal(banner.textContent, "Two words to find", "progress banner restored");
 
 typeRow("crane");
 assert.equal(banner.textContent, "One down \u2014 one to go", "find works after a refresh");
@@ -357,9 +362,9 @@ assertRowMarks(1, "crane", ["correct", "correct", "correct", "correct", "correct
 
 dailyGame(); // refresh again, now with one word found
 assert.equal(board.children.length, 3, "two scored rows + a waiting row");
+assert.equal(banner.textContent, "One down \u2014 one to go", "found state survived the refresh");
 typeRow("crane"); // the found word, again: must score vs cramp only
 assertRowMarks(2, "crane", evalWord("crane", "cramp"));
-assert.equal(banner.textContent, "", "found state survived the refresh (no re-find banner)");
 
 typeRow("cramp");
 assert.equal(banner.textContent, "Both words \u2014 4 guesses", "win after refreshes");
@@ -426,7 +431,7 @@ assert.equal(s.date, MEDDLE.todayKey(), "re-stamped with today");
 assert.deepEqual(s.words, MEDDLE.wordsFor(MEDDLE.todayKey()), "new day, new daily pair");
 assert.deepEqual(s.guesses, [], "guesses reset");
 assert.equal(board.children.length, 1, "back to a single row");
-assert.equal(banner.textContent, "", "banner cleared");
+assert.equal(banner.textContent, "Two words to find", "banner back to the start");
 console.log("ok — next day: fresh board and a new date-derived pair");
 
 // ---------- 13. corrupt saves fall back to a fresh game ----------

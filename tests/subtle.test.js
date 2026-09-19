@@ -170,10 +170,10 @@ console.log("ok — word lists (2315 answers, 14855 guessable, answers ⊆ guess
 const score = SUBTLE.scoreFor;
 assert.equal(score("crane", "crane"), 100, "exact match scores 100");
 assert.equal(score("crane", "hoist"), 0, "nothing shared scores 0");
-assert.equal(score("crane", "brane"), 84, "one letter off, 4 greens: 84 (the ceiling)");
-assert.equal(score("crane", "crank"), 84, "one substitution at the end: 84");
-assert.equal(score("crane", "canoe"), 62, "2 greens, 2 astray, distance 2: 62");
-assert.equal(score("crane", "brain"), 48, "2 greens, 1 astray, distance 3: 48");
+assert.equal(score("crane", "brane"), 80, "one letter off, 4 greens: 80 (the non-exact ceiling)");
+assert.equal(score("crane", "crank"), 80, "one substitution at the end: 80");
+assert.equal(score("crane", "canoe"), 60, "2 greens, 2 astray: 60");
+assert.equal(score("crane", "brain"), 50, "2 greens, 1 astray: 50");
 assert.ok(score("crane", "brane") > score("crane", "canoe"),
   "sanity: closer words score higher");
 for (const [a, b] of [["crane", "eerie"], ["slate", "crane"], ["crane", "slate"]]) {
@@ -186,8 +186,10 @@ for (const g of DICT) {
   assert.equal(s === 100, g === "crane", `only the answer scores 100 ("${g}")`);
   scale.add(s);
 }
-assert.ok(scale.size >= 20, `plenty of scale: ${scale.size} distinct scores (want 20+)`);
-console.log(`ok — scoring: exact=100, one-off=84 ceiling, ${scale.size} distinct values, symmetric, unique 100`);
+const LADDER = [0, 10, 20, 30, 40, 50, 60, 70, 80, 100];
+assert.deepEqual([...scale].sort((a, b) => a - b), LADDER,
+  "scores land on the 10-point ladder, every rung reachable");
+console.log(`ok — scoring: exact=100, one-off=80 ceiling, ${scale.size} distinct values, symmetric, unique 100`);
 
 // ---------- 3. daily salt: Subtle must not serve Bundle's word ----------
 
@@ -255,7 +257,7 @@ assert.equal(chip(0).textContent, String(score("crane", dailyAnswer)),
   "unseeded daily guess settles its score");
 
 seedDaily("crane");
-const script = [["hoist", 0], ["canoe", 62], ["brane", 84]];
+const script = [["hoist", 0], ["canoe", 60], ["brane", 80]];
 for (const [word, expected] of script) {
   typeRow(word);
   const r = board.children.length - 2; // the row just settled
@@ -297,8 +299,8 @@ assert.match(lines[0], /^Subtle · \d{4}-\d{2}-\d{2} · 4 guesses$/, "share show
 assert.equal(lines[1], GAME_URL, "share links to the game");
 assert.equal(lines.length, 6, "header + link + one bar per guess");
 assert.equal(lines[2], "░░░░░░░░░░ 0", "score 0 bar");
-assert.equal(lines[3], "██████░░░░ 62", "score 62 bar");
-assert.equal(lines[4], "████████░░ 84", "score 84 bar");
+assert.equal(lines[3], "██████░░░░ 60", "score 60 bar");
+assert.equal(lines[4], "████████░░ 80", "score 80 bar");
 assert.equal(lines[5], "██████████ 100", "score 100 bar");
 
 // finished board is locked
@@ -330,11 +332,11 @@ for (let r = 0; r < 2; r++) {
 }
 assert.ok(rowEl(2).classList.contains("active"), "row 2 waits for input");
 assert.equal(chip(2).textContent, "\u00B7", "waiting chip restored");
-assert.equal(keyFor("o").style["--m"], mix(62, 2),
+assert.equal(keyFor("o").style["--m"], mix(60, 2),
   "keyboard tint rebuilt from restored guesses");
 
 typeRow("brane");
-assert.equal(chip(2).textContent, "84", "game continues after refresh");
+assert.equal(chip(2).textContent, "80", "game continues after refresh");
 for (let i = 0; i < 10; i++) keydown("Backspace");
 typeRow("crane");
 s = readSave();
@@ -426,14 +428,14 @@ for (const L of "hoist") {
     `used letter "${L}" shows the minimum tint`);
 }
 
-typeRow("canoe"); // scores 62: c,a,n,e earn it, o carries 0+62 — same share
-assert.equal(keyFor("o").style["--m"], mix(62, 2), "'o' tints by its share of all score");
-assert.equal(keyFor("c").style["--m"], mix(62, 2), "'c' tints by its share of all score");
+typeRow("canoe"); // scores 60: c,a,n,e earn it, o carries 0+60 — same share
+assert.equal(keyFor("o").style["--m"], mix(60, 2), "'o' tints by its share of all score");
+assert.equal(keyFor("c").style["--m"], mix(60, 2), "'c' tints by its share of all score");
 assert.ok(parseFloat(keyFor("o").style["--m"]) > parseFloat(keyFor("h").style["--m"]),
   "a letter with earned score tints stronger than a zero-score letter");
 
 dailyGame(); // refresh: tint rebuilt from the save, unchanged
-assert.equal(keyFor("o").style["--m"], mix(62, 2), "tint survives a refresh");
+assert.equal(keyFor("o").style["--m"], mix(60, 2), "tint survives a refresh");
 
 newBtn.click(); // practice: a fresh board clears the tints
 assert.equal(keyFor("o").style["--m"], "0.0000", "practice starts untinted");

@@ -193,6 +193,7 @@
       words = wordsFor(key);
       resetBoard();
       saveState();
+      showBanner("Two words to find");
     }
   }
 
@@ -245,8 +246,13 @@
       gaveUp = !!saved.gaveUp;
       showBanner(endBanner());
       shareBtn.classList.remove("hidden");
-    } else if (!rowEls[guesses.length]) {
-      addRow(); // the waiting row — resetBoard's first row may already be it
+    } else {
+      if (!rowEls[guesses.length]) {
+        addRow(); // the waiting row — resetBoard's first row may already be it
+      }
+      showBanner((found[0] || found[1])
+        ? "One down \u2014 one to go"
+        : "Two words to find");
     }
     updateActions();
     settleScroll(true);
