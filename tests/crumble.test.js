@@ -293,7 +293,7 @@ for (let c = 0; c < 5; c++) {
   assert.equal(qtile(c).textContent, "", `queue(${c}) starts empty`);
   assert.ok(qtile(c).classList.contains("tile"), `queue(${c}) is a tile`);
 }
-assert.equal(ghosts.children.length, 25, "ghost cells sketch the 5×5 shaft");
+assert.equal(ghosts.children.length, 40, "ghost cells sketch the 5×8 shaft");
 assert.ok(!well.classList.contains("done"), "the well is open");
 assert.ok(!giveUpBtn.classList.contains("hidden"), "give up offered on a fresh board");
 assert.ok(shareBtn.classList.contains("hidden"), "no share before an end state");
@@ -490,7 +490,7 @@ assert.equal(s.date, CRUMBLE.todayKey(), "re-stamped with today");
 assert.equal(s.answer, CRUMBLE.answerFor(CRUMBLE.todayKey()), "new day, new daily word");
 assert.deepEqual(s.guesses, [], "guesses reset");
 assert.deepEqual(pileShape(), [[], [], [], [], []], "back to an empty well");
-assert.equal(ghosts.children.length, 25, "ghost grid rebuilt");
+assert.equal(ghosts.children.length, 40, "ghost grid rebuilt");
 
 for (const bad of [
   { date: CRUMBLE.todayKey(), answer: "qqqqq", guesses: [] },  // not a word
@@ -533,12 +533,12 @@ assert.equal(globalThis.localStorage.getItem("crumble-day6"), saveBeforePractice
 newBtn.click(); // back to today's puzzle
 assert.equal(newBtn.textContent, "Practice", "button back to Practice");
 assert.deepEqual(pileShape(), [[], [], [], [], []], "daily well fresh again");
-assert.equal(ghosts.children.length, 25, "ghost grid cleared for the new game");
+assert.equal(ghosts.children.length, 40, "ghost grid cleared for the new game");
 assert.ok(!well.classList.contains("done"), "the well reopens");
 assert.ok(!giveUpBtn.classList.contains("hidden"), "give up back for the fresh daily");
 console.log("ok — practice: forced + random words, no save writes, dump, round-trips to daily");
 
-// ---------- 15. the well extends: a tall column outgrows the 6-row start ---
+// ---------- 15. the deep win: a tall column, "Phew", no overflow ----------
 
 seedDaily("crane");
 // c-words whose remaining letters never touch r/a/n/e → each drops exactly
@@ -547,7 +547,7 @@ const tall = [...DICT].filter((w) => /^c[^rane][^rane][^rane][^rane]$/.test(w)).
 assert.equal(tall.length, 7, `need seven c-first filler words, found ${tall.length}`);
 for (const w of tall) typeRow(w);
 assert.equal(pileCol(0).length, 7, "seven greens stacked in column 0");
-assert.ok(ghosts.children.length > 25, "the shaft extended past its starting depth");
+assert.equal(dump().overflow, false, "seven of eight rows is still survivable");
 for (const [ci, col] of dump().pile.entries()) {
   for (let r = 1; r < col.length; r++) {
     assert.ok(!(col[r].mark === "present" && col[r - 1].mark === "present"),
@@ -555,9 +555,44 @@ for (const [ci, col] of dump().pile.entries()) {
   }
 }
 typeRow("crane");
-// crane lands on a 7-tall column: its own c sinks to row 7, but row 0 is
-// already c,r,a,n,e from the filler's bottom green — assembled win.
-assert.equal(banner.textContent, "Phew \u2014 8 guesses", "the win after a tall stack");
-console.log("ok — the well extends: a 7-tall column, gravity holds, win still lands");
+// crane lands at the brim (base 7): its own c sinks to row 7, but row 0 is
+// already c,r,a,n,e from the filler's bottom green — assembled win, one
+// row from death, so the banner is a genuine "Phew".
+assert.equal(banner.textContent, "Phew \u2014 8 guesses", "deep win is a Phew");
+assert.equal(dump().won, true, "won despite topping out one row later");
+console.log("ok — the deep win: 7-tall column, Phew for escaping by inches");
+
+// ---------- 16. top out: pile reaching the well top is game over ----------
+
+seedDaily("crane");
+const eight = [...DICT].filter((w) => /^c[^rane][^rane][^rane][^rane]$/.test(w)).slice(0, 8);
+assert.equal(eight.length, 8, `need eight c-first filler words, found ${eight.length}`);
+for (const w of eight) typeRow(w);
+assert.equal(pileCol(0).length, 8, "the column touches the top row");
+assert.equal(dump().done, true, "topping out ends the game");
+assert.equal(dump().won, false, "an overflow is not a win");
+assert.equal(dump().overflow, true, "overflow flag set");
+assert.equal(banner.textContent, "The well overflowed \u2014 the word was CRANE",
+  "overflow banner names the word");
+assert.ok(well.classList.contains("done"), "the well closes on overflow");
+assert.ok(giveUpBtn.classList.contains("hidden"), "give up retires on overflow");
+keydown("a");
+assert.equal(dump().guesses.length, 8, "board locked after overflow");
+
+shareBtn.classList.remove("hidden");
+shareBtn.click();
+const ota = createdEls.filter((e) => e.tagName === "textarea").pop();
+assert.match(ota.value.split("\n")[0],
+  /^Crumble · \d{4}-\d{2}-\d{2} · overflowed · 8 guesses$/,
+  "overflow share tags the topping out");
+
+dailyGame(); // refresh
+assert.equal(dump().overflow, true, "overflow restored");
+assert.equal(banner.textContent, "The well overflowed \u2014 the word was CRANE",
+  "overflow banner restored");
+assert.ok(well.classList.contains("done"), "restored well stays closed");
+keydown("a");
+assert.equal(dump().guesses.length, 8, "restored board stays locked");
+console.log("ok — top out: pile to the brim overflows the well, saves, restores locked");
 
 console.log("\nAll crumble tests passed.");

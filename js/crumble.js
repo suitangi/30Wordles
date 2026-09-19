@@ -12,7 +12,9 @@
 // both vanish. The game is won only when the settling leaves the answer
 // reading fully horizontal somewhere in the pile: a typed answer can
 // scatter as it sinks, so sometimes you have to build the row piece by
-// piece. Guesses are unlimited; give up is the loss.
+// piece. The well is 5×8 and does not grow — if the pile reaches the top
+// it overflows and the game ends. Guesses are unlimited until then; give
+// up anytime.
 (function () {
   "use strict";
 
@@ -20,7 +22,7 @@
   var SALT = "crumble"; // daily hash salt — each variant salts its own way
   var STORE_KEY = "crumble-day6";
   var GAME_URL = "https://suitangi.github.io/30Wordles/days/6";
-  var WELL_ROWS = 6;   // visible rows at the start, queue row included
+  var WELL_ROWS = 8;   // the grid: 5 wide, 8 deep — pile to the top = loss
   var GAP = 5;         // px between tiles — keep in sync with the CSS
 
   // The drop timeline (ms, from Enter): the piece falls from the queue,
@@ -53,6 +55,7 @@
   var done = false;
   var won = false;
   var gaveUp = false;
+  var overflow = false; // the pile reached the top of the well — game over
   var revealing = false;
   var practice = false;
   var guesses = [];      // { w, m } — in drop order, for save + share
@@ -154,7 +157,8 @@
         guesses: guesses,
         done: done,
         won: won,
-        gaveUp: gaveUp
+        gaveUp: gaveUp,
+        overflow: overflow
       }));
     } catch (e) { /* storage unavailable — game still playable */ }
   }
@@ -176,18 +180,14 @@
     return (queueTiles[0] ? queueTiles[0].offsetWidth : 0) + GAP;
   }
 
-  // The shaft holds the pile plus one empty landing row; it starts deep
-  // enough for WELL_ROWS rows (queue row included) and extends as the pile
-  // grows. Height is px — rows are square, measured off a queue tile.
+  // The well is a fixed 5×8 grid — it never grows. Height is px; rows are
+  // square, measured off a queue tile.
   function renderWell() {
     var p = pitch();
-    var pileRows = Math.max(cols[0].length, cols[1].length, cols[2].length,
-      cols[3].length, cols[4].length);
-    var shaftRows = Math.max(WELL_ROWS - 1, pileRows + 1);
-    shaftEl.style.height = (shaftRows * p - GAP) + "px";
+    shaftEl.style.height = (WELL_ROWS * p - GAP) + "px";
 
     ghostsEl.innerHTML = "";
-    for (var r = 0; r < shaftRows; r++) {
+    for (var r = 0; r < WELL_ROWS; r++) {
       for (var c = 0; c < COLS; c++) {
         var cell = document.createElement("div");
         cell.className = "cell";
@@ -216,6 +216,7 @@
     done = false;
     won = false;
     gaveUp = false;
+    overflow = false;
     revealing = false;
     guesses = [];
     typed = Array(COLS).fill("");
@@ -286,6 +287,7 @@
       done = true;
       won = !!saved.won;
       gaveUp = !!saved.gaveUp;
+      overflow = !!saved.overflow;
       var winRow = won ? scanWin(cols, answer) : -1;
       if (winRow >= 0) {
         for (var w = 0; w < COLS; w++) {
@@ -377,7 +379,7 @@
 
     // Grow the shaft first so the landing row and the spawn slot both fit.
     renderWell();
-    var spawnRow = Math.max(WELL_ROWS - 1, frame.base + 1) - 1;
+    var spawnRow = WELL_ROWS - 1;
     var fallRows = spawnRow - frame.base;
     var dur = 260 + Math.min(360, fallRows * 55);
 
@@ -506,6 +508,19 @@
       wellEl.classList.add("done");
       showBanner(endBanner());
       shareBtn.classList.remove("hidden");
+    } else {
+      // Tetris rules: pile touching the top of the well overflows it.
+      var maxH = 0;
+      for (var h = 0; h < COLS; h++) {
+        maxH = Math.max(maxH, cols[h].length);
+      }
+      if (maxH >= WELL_ROWS) {
+        done = true;
+        overflow = true;
+        wellEl.classList.add("done");
+        showBanner(endBanner());
+        shareBtn.classList.remove("hidden");
+      }
     }
     renderWell();
     updateActions();
@@ -514,15 +529,24 @@
   }
 
   function endBanner() {
+    if (overflow) {
+      return "The well overflowed \u2014 the word was " + answer.toUpperCase();
+    }
     if (!won) return "The word was " + answer.toUpperCase();
     var n = guesses.length;
+    var count = n + (n === 1 ? " guess" : " guesses");
+    // "Phew" is for escaping by inches now: a win with the pile six or
+    // more rows up the eight-row well. Shallow wins keep the count ladder.
+    var depth = 0;
+    for (var c = 0; c < COLS; c++) depth = Math.max(depth, cols[c].length);
+    if (depth >= WELL_ROWS - 2) return "Phew \u2014 " + count;
     var praise = ["Genius", "Magnificent", "Impressive", "Splendid",
-      "Great", "Phew"][Math.min(n - 1, 5)];
-    return praise + " \u2014 " + n + (n === 1 ? " guess" : " guesses");
+      "Great"][Math.min(n - 1, 4)];
+    return praise + " \u2014 " + count;
   }
 
-  // There's no guess cap, so giving up is the loss: end the game, reveal
-  // the answer, freeze the well.
+  // Voluntary loss: end the game, reveal the answer, freeze the well. (The
+  // involuntary loss is the overflow — pile reaching the top of the well.)
   function giveUp() {
     if (done || revealing) return;
     done = true;
@@ -597,7 +621,8 @@
     var n = guesses.length;
     var count = n + (n === 1 ? " guess" : " guesses");
     var title = ["Crumble", practice ? "practice" : todayKey(),
-      gaveUp ? "gave up \u00B7 " + count : count]
+      gaveUp ? "gave up \u00B7 " + count
+        : overflow ? "overflowed \u00B7 " + count : count]
       .join(" \u00B7 ");
     var lines = [title, GAME_URL];
     guesses.forEach(function (g) {
@@ -675,6 +700,7 @@
         done: done,
         won: won,
         gaveUp: gaveUp,
+        overflow: overflow,
         guesses: guesses.map(function (g) { return { w: g.w, m: g.m.join("") }; }),
         save: loadSaved()
       };
