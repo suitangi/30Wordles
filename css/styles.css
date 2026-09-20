@@ -1035,6 +1035,339 @@ body.crumble {
   0%, 100% { box-shadow: none; }
   40% { box-shadow: 0 0 18px var(--accent-soft); }
 }
+
+/* ---------- Bubble board (Day 7) ---------- */
+
+/* Page-scoped accent: soap-bubble cyan (celebration only — marks carry no
+   color on this page). Root --accent stays Bundle's water blue. --iris is
+   the shared thin-film rainbow every bubble rim wears. */
+body.bubble {
+  --accent: #0891b2;
+  --accent-soft: rgba(8, 145, 178, 0.12);
+  --iris: conic-gradient(from 220deg,
+    rgba(255, 154, 213, 0.6),
+    rgba(255, 210, 143, 0.52),
+    rgba(154, 240, 192, 0.55),
+    rgba(140, 200, 255, 0.62),
+    rgba(192, 154, 255, 0.55),
+    rgba(255, 154, 213, 0.6));
+  /* How far the lamella's flat wall sits from the bubble's bounding edge
+     — expressed as the facing corners' horizontal border-radius, so the
+     wall ends ROUNDED (a clip made them pointy). Retune live with
+     BUBBLE.wall() in the console. */
+  --wall-inset: 40%;
+  /* Breathing room between two connected lamellae. */
+  --wall-gap: 8px;
+  /* The soap film every bubble wears, and the flat shared wall drawn
+     between connected bubbles (a faint vertical line, brighter than the
+     film — real double bubbles show their common wall). The lamella line
+     hugs the clip plane so the full stroke survives the flat clip. */
+  /* The film is three separate layers — and MUST stay three separate
+     custom props (--film-a/b/c) wherever it shares a background-image
+     list with other layers: var(--film) in a list expands to three
+     layers, and background-size/position lists then cycle misaligned
+     (that's what painted middle bubbles solid blue). */
+  --film-a: radial-gradient(circle at 32% 27%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 36%);
+  --film-b: radial-gradient(circle at 70% 78%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 45%);
+  --film-c: linear-gradient(165deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.09));
+  --film: var(--film-a), var(--film-b), var(--film-c);
+  --wall: rgba(160, 210, 255, 0.7);
+  /* The lamella line: a short vertical stripe at the bubble's facing
+     edge, spanning the flat wall between the rounded corners. */
+  --wall-line: linear-gradient(var(--wall), var(--wall));
+}
+[data-theme="dark"] body.bubble {
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.14);
+}
+
+.bubble-game { max-width: 350px; }
+
+/* The title practices the game: every letter of the name floats in its own
+   soap bubble — the same iridescent shell the board's bubbles wear. Letters
+   blow in one after another, then bob gently at staggered lifts. */
+.bubble-title {
+  display: flex;
+  align-items: center;
+  gap: 0.13em;
+}
+.bubble-title .tb {
+  --lift: 0.03em;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 31% 26%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(circle at 70% 78%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.1));
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(var(--lift));
+  animation:
+    tb-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    tb-bob 2.4s ease-in-out infinite;
+  animation-delay: 0s, 1s;
+  /* keep the bob on the compositor — a slow tiny translate on
+     rasterized text pixel-snaps and reads as single-frame jumps */
+  will-change: transform;
+  user-select: none;
+}
+.bubble-title .tb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: var(--iris);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.bubble-title .tb:nth-child(2) { --lift: -0.06em; animation-delay: 0.08s, 1.12s; }
+.bubble-title .tb:nth-child(3) { --lift: 0.07em; animation-delay: 0.16s, 1.24s; }
+.bubble-title .tb:nth-child(4) { --lift: -0.03em; animation-delay: 0.24s, 1.36s; }
+.bubble-title .tb:nth-child(5) { --lift: 0.05em; animation-delay: 0.32s, 1.48s; }
+.bubble-title .tb:nth-child(6) { --lift: -0.07em; animation-delay: 0.4s, 1.6s; }
+@keyframes tb-in {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: translateY(var(--lift)) scale(1); opacity: 1; }
+}
+@keyframes tb-bob {
+  0%, 100% { transform: translateY(var(--lift)); }
+  50% { transform: translateY(calc(var(--lift) - 0.09em)); }
+}
+
+/* Rows of bubbles. Bubbles are soap film, not tiles: no fills, no borders
+   — a transparent film with one glossy highlight and a thin iridescent rim
+   (::before, the masked conic ring; border-image can't take border-radius,
+   so the rim is a pseudo masked down to a ring). An EMPTY slot carries no
+   shell at all: the bubble is born with its letter (suitangi: bubbles
+   appear when the letters appear), wears its film while filled, and firms
+   when held. The puzzle is color-agnostic: shape is the only voice —
+   popped, held, fused. */
+.bubble-board {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.brow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+.brow .tile {
+  position: relative;
+  border: none;
+  border-radius: 50%;
+  text-shadow: 0 0 6px var(--bg);
+}
+/* The film is a ::after BEHIND the letter (z -1) so it can fade in and out
+   with opacity — background gradients can't transition. The rim stays a
+   ::before masked ring. An EMPTY slot carries neither: the bubble is born
+   with its letter (suitangi: bubbles appear when the letters appear). */
+.brow .tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: var(--film);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.brow .tile.filled::after,
+.brow .tile.held::after,
+.brow .tile.popped::after { opacity: 1; }
+/* Connected bubbles draw their half of the shared wall on their film: a
+   vertical stripe at the facing edge, 60% of the bubble tall — exactly
+   the flat stretch between the rounded corners. */
+.brow .tile.wr::after {
+  background-image: var(--film-a), var(--film-b), var(--film-c), var(--wall-line);
+  background-size: auto, auto, auto, 2px 60%;
+  background-position: 0 0, 0 0, 0 0, calc(100% - 1px) 50%;
+  background-repeat: no-repeat;
+}
+.brow .tile.wl::after {
+  background-image: var(--film-a), var(--film-b), var(--film-c), var(--wall-line);
+  background-size: auto, auto, auto, 2px 60%;
+  background-position: 0 0, 0 0, 0 0, 1px 50%;
+  background-repeat: no-repeat;
+}
+.brow .tile.wr.wl::after {
+  background-image: var(--film-a), var(--film-b), var(--film-c),
+    var(--wall-line), var(--wall-line);
+  background-size: auto, auto, auto, 2px 60%, 2px 60%;
+  background-position: 0 0, 0 0, 0 0, calc(100% - 1px) 50%, 1px 50%;
+  background-repeat: no-repeat;
+}
+.brow .tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2.5px;
+  background: var(--iris);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.brow .tile.filled::before { opacity: 0.85; }
+.brow .tile.held::before { opacity: 1; }
+/* Popped bubbles keep their whole shell — the pop bursts a full bubble,
+   not a ghost of one. */
+.brow .tile.popped::before { opacity: 0.85; }
+/* A typed letter blows up into its bubble (springy overshoot). */
+.brow .tile.bub-in { animation: bub-grow 0.24s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes bub-grow {
+  from { transform: scale(0.35); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+/* The pre-reveal swell: the whole bubble blows up before its fate shows. */
+.brow .tile.swell { animation: bub-swell 0.3s ease; }
+@keyframes bub-swell {
+  0%, 100% { transform: scale(1); }
+  55% { transform: scale(1.14); }
+}
+/* The pop, slow and dramatic: the skin inflates, hesitates, over-stretches
+   — then bursts. Fill-forwards holds the cell invisible. */
+.brow .tile.pop { animation: bub-pop 0.95s ease-in forwards; }
+@keyframes bub-pop {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.22); opacity: 1; }
+  45% { transform: scale(1.1); opacity: 1; }
+  58% { transform: scale(1.3); opacity: 1; }
+  64% { transform: scale(1.26); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+/* The burst itself, at the pop's over-stretch point: the rim flashes into
+   an expanding ring while a spray of droplets (one box-shadow constellation
+   — transform: scale flies them all outward together) scatters and fades. */
+.brow .tile.pop::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--text) 40%, transparent);
+  box-shadow:
+    -18px -22px 0 -1px color-mix(in srgb, var(--accent) 55%, transparent),
+    16px -24px 0 -1.5px color-mix(in srgb, var(--text) 32%, transparent),
+    25px 3px 0 -1px color-mix(in srgb, var(--accent) 45%, transparent),
+    -23px 11px 0 -1.5px color-mix(in srgb, var(--text) 32%, transparent),
+    -1px 27px 0 -1px color-mix(in srgb, var(--accent) 55%, transparent);
+  opacity: 0;
+  transform: scale(0.5);
+  animation: bub-burst 0.95s ease-out forwards;
+}
+@keyframes bub-burst {
+  0%, 58% { opacity: 0; transform: scale(0.5); }
+  63% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+/* A connected run: the bubbles stay THEMSELVES but stop being perfect
+   circles — connected neighbours reshape into rounded D's (border-radius
+   on the cell; film and rim inherit it), slide to sit --wall-gap apart,
+   and each draws its lamella line at its facing edge. (suitangi: keep the
+   bubbles individually visible with a flat line between, round the ends
+   where the outline meets the wall, and they "connect", not "fuse".) */
+.run {
+  position: relative;
+  display: flex;
+  gap: 5px; /* keep in sync with the JS seam math */
+}
+.run .tile {
+  flex: 1;
+  min-width: 0;
+  transition: border-radius 0.35s ease;
+}
+.run.on .tile {
+  /* Slide until the facing edges sit --wall-gap apart: layout puts
+     neighbours 5px apart (the row gap), so each junction closes
+     (5px - gap) — negative = the chain eases apart. translateX % is
+     relative to the bubble itself, so it stays exact at any size. */
+  --tx: calc((var(--ci, 0) - (var(--ck, 1) - 1) / 2) *
+    (5px - var(--wall-gap)));
+  transform: translateX(var(--tx));
+  animation: connect-press 0.5s ease;
+}
+/* Connected bubbles aren't clipped circles — they're shaped D's: the
+   facing side's corners carry the border-radius (film AND rim follow it),
+   so the outline rounds smoothly into the lamella instead of stabbing
+   into it at a point. The flat wall between the corners spans 60% of the
+   height (100% minus the two 20% vertical radii). */
+.run.on .tile.wr {
+  border-radius: 50% var(--wall-inset) var(--wall-inset) 50% /
+    50% 20% 20% 50%;
+}
+.run.on .tile.wl {
+  border-radius: var(--wall-inset) 50% 50% var(--wall-inset) /
+    20% 50% 50% 20%;
+}
+.run.on .tile.wr.wl {
+  border-radius: var(--wall-inset) var(--wall-inset) var(--wall-inset)
+    var(--wall-inset) / 20% 20% 20% 20%;
+}
+/* The press: slide in and bulge as the skins meet, then settle on the
+   shared wall. */
+@keyframes connect-press {
+  0% { transform: translateX(0) scale(1); }
+  45% { transform: translateX(var(--tx)) scale(1.06, 1.12); }
+  100% { transform: translateX(var(--tx)) scale(1); }
+}
+/* The blown word: the answer as one connected chain. The glow rides the
+   container with a stadium radius — soft enough that the silhouette
+   mismatch with the flat-walled circles doesn't read. */
+.run.win {
+  border-radius: 999px;
+  animation: run-win 1.6s ease 0.35s;
+}
+@keyframes run-win {
+  0%, 100% { box-shadow: none; }
+  40% { box-shadow: 0 0 20px var(--accent-soft); }
+}
+
+/* Restored rows are born resolved: no grow, no swell, no pop, no press —
+   and popped bubbles, whose pop animation is disabled here, hide outright.
+   Connected rows are built already shaped and spaced (quiet kills the
+   margin transition, so they don't slide on load). */
+.brow.quiet .tile {
+  animation: none;
+  transition: none;
+}
+.brow.quiet .run { animation: none; }
+.brow.quiet .tile.popped { opacity: 0; }
+
+/* Kept letters light their keys with the film's own pastels — the
+   keyboard's whole vocabulary is kept vs absent, like the board's. */
+body.bubble .key.kept {
+  background: linear-gradient(120deg,
+    rgba(255, 154, 213, 0.38),
+    rgba(255, 210, 143, 0.34),
+    rgba(154, 240, 192, 0.36),
+    rgba(140, 200, 255, 0.4),
+    rgba(192, 154, 255, 0.38));
+  color: var(--text);
+}
+
+/* Restated last and at full specificity: this game's own animation classes
+   would otherwise out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha, bubble edition). submit() still clears shake
+   before revealing. */
+.brow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
