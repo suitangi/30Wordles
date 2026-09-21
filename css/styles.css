@@ -1368,6 +1368,147 @@ body.bubble .key.kept {
    before revealing. */
 .brow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Swivel board (Day 8) ---------- */
+
+/* Page-scoped accent: moss green. Root --accent stays Bundle's water
+   blue. */
+body.swivel {
+  --accent: #4d7c0f;
+  --accent-soft: rgba(77, 124, 15, 0.12);
+}
+[data-theme="dark"] body.swivel {
+  --accent: #a3e635;
+  --accent-soft: rgba(163, 230, 53, 0.13);
+}
+
+.swivel-game { max-width: 420px; }
+.swivel-game .game-actions { flex-wrap: wrap; justify-content: center; }
+/* The banner sits between the board and the buttons, with breathing
+   room on both sides. */
+.swivel-game .game-banner { margin: 16px 0 18px; }
+/* Clue swaps fade instead of snapping: as the board turns, the shared
+   tiles cross-fade to the other board's colors (and the keyboard with
+   them) — overriding the shared 0.15s snap. */
+.swivel-board .tile {
+  transition: background-color 0.45s ease, border-color 0.45s ease;
+}
+body.swivel .key { transition: background-color 0.45s ease; }
+
+/* The title swivels in: each letter lands with a quarter-turn pivot.
+   Delays are per-child EXPLICIT values — no calc-in-delay (the Bubble
+   day's gotcha). */
+.swivel-title .swv {
+  display: inline-block;
+  animation: sw-title-in 0.55s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+.swivel-title .swv:nth-child(2) { animation-delay: 0.07s; }
+.swivel-title .swv:nth-child(3) { animation-delay: 0.14s; }
+.swivel-title .swv:nth-child(4) { animation-delay: 0.21s; }
+.swivel-title .swv:nth-child(5) { animation-delay: 0.28s; }
+.swivel-title .swv:nth-child(6) { animation-delay: 0.35s; }
+@keyframes sw-title-in {
+  from { transform: rotate(90deg) scale(0.4); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* The pivot: a viewport whose width/height swap while the board rotates
+   90° inside it — the board is 8 wide x 6 tall, so rotated its footprint
+   is 6 x 8. JS sizes both boxes in px (from the tile pitch) so the swap
+   stays exact at any screen width. Swiveling is CLOCKWISE: it lands the
+   horizontal board upright (M to H); counterclockwise returns to the
+   main board. */
+.pivot {
+  position: relative;
+  margin: 0 auto;
+  transition: width 0.65s cubic-bezier(0.7, 0, 0.3, 1),
+    height 0.65s cubic-bezier(0.7, 0, 0.3, 1);
+}
+.swivel-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 5px;
+  transform: translate(-50%, -50%);
+  transition: transform 0.65s cubic-bezier(0.7, 0, 0.3, 1);
+}
+.pivot.swiveled .swivel-board { transform: translate(-50%, -50%) rotate(90deg); }
+
+.swivel-board .tile {
+  aspect-ratio: auto; /* the board's px box makes the cells square */
+  font-size: 1em;     /* JS sets the board's font from the tile pitch */
+  border-radius: 3px;
+}
+.swivel-board .tile.ghost { opacity: 0.45; }
+
+/* Every glyph rides a span so it can turn. The swivel counter-rotates
+   the letters a quarter-turn against the board's clockwise turn, so they
+   all land face-up on screen — including the horizontal board's letters,
+   which sit at -90° (tops left) while the board is upright. */
+.swivel-board .lt {
+  display: inline-block;
+  transition: transform 0.65s cubic-bezier(0.7, 0, 0.3, 1);
+}
+.swivel-board .s-tile .lt { transform: rotate(-90deg); }
+.pivot.swiveled .swivel-board .lt { transform: rotate(-90deg); }
+
+/* The crossing tiles (the 5x5 = 25-tile overlap) score BOTH ways but
+   show ONE clue at a time, following the view: the main wordle's clue
+   while upright, the horizontal wordle's clue once swiveled (those clues
+   only exist once the sixth main word completes the columns). The moment
+   the columns score, the whole crossing block pulses. */
+.swivel-board .duo.scored { animation: duo-scored 1.1s ease; }
+@keyframes duo-scored {
+  0%, 100% { box-shadow: none; }
+  40% { box-shadow: 0 0 16px var(--accent-soft); }
+}
+
+/* Board dividers: a dotted line splitting the two boards, one per view,
+   both in the game's lime accent. Upright, divider-m stands vertical in
+   the gap between main columns 5 and 6 (main board left, horizontal
+   board's open columns right). Swiveled, divider-h lies horizontal in
+   the gap between main rows 1 and 2 — on screen it stands between the
+   horizontal board's letter columns and the main-only heel column. The
+   view class shows one and hides the other. */
+.swivel-board .divider {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.8;
+}
+.swivel-board .divider-m {
+  top: 0;
+  bottom: 0;
+  left: calc((100% + 5px) * 5 / 8 - 2.5px);
+  width: 2px;
+  background-image: repeating-linear-gradient(to bottom,
+    var(--accent) 0 4px, transparent 4px 9px);
+}
+.swivel-board .divider-h {
+  left: 0;
+  right: 0;
+  top: calc((100% + 5px) * 1 / 6 - 2.5px);
+  height: 2px;
+  background-image: repeating-linear-gradient(to right,
+    var(--accent) 0 4px, transparent 4px 9px);
+}
+.pivot.swiveled .swivel-board .divider-m,
+.pivot:not(.swiveled) .swivel-board .divider-h { display: none; }
+
+/* Found words glow down their line (keyframes shared with Crumble). */
+.swivel-board .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* Restored boards are born resolved: tiles rebuilt from the save carry
+   `quiet` — no reveal animations. repaintMain() strips it from cells it
+   repaints, so their clue swaps still fade on later view toggles. */
+.swivel-board .tile.quiet { animation: none; }
+
+/* Restated last and at full specificity: this game's scoped classes would
+   otherwise out-rank the shared .tile.shake and mute the reject shake
+   (the Day 1 gotcha). submit() still clears shake before revealing. */
+.swivel-board .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
