@@ -1675,6 +1675,100 @@ body.hustle .tile.reveal { animation-duration: 0.3s; }
   to { transform: none; opacity: 0.55; }
 }
 
+/* ---------- Castle board (Day 11) ---------- */
+
+/* Page-scoped accent: cobalt — heraldic royal blue. Root --accent stays
+   Bundle's water blue. */
+body.castle {
+  --accent: #1d4ed8;
+  --accent-soft: rgba(29, 78, 216, 0.1);
+}
+[data-theme="dark"] body.castle {
+  --accent: #8ab0f5;
+  --accent-soft: rgba(138, 176, 245, 0.14);
+}
+
+.castle-game { max-width: 350px; }
+
+/* Rows grow on demand inside the shared scroll window. */
+.crow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.crow.quiet { animation: none; }
+
+/* The walled tiles: colorless — they carry the letter but no mark color,
+   and their border turns to dashed stonework (the pending row wears it
+   too, as the player's map of what will clue this guess). */
+.crow .tile.locked { border-style: dashed; }
+
+/* A breach just opened this slot on the waiting row: the wall flashes
+   cobalt and the dashes stand down. */
+.crow .tile.gate-open { animation: gate-open 0.9s ease; }
+@keyframes gate-open {
+  0%, 100% { box-shadow: none; }
+  40% { box-shadow: 0 0 16px var(--accent-soft); border-color: var(--accent); }
+}
+
+/* The castle falls: the winning row glows down its line (keyframes
+   shared with Crumble/Swivel). */
+.crow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title sits inside its own keep — and the whole keep is ONE
+   continuous line: an inline SVG path runs up the left side, rises and
+   dips across five crenels along the top, down the right side and home
+   along the bottom (suitangi: the outline of crenels, connected to the
+   box — not solid blocks). preserveAspectRatio="none" lets it hug the
+   word at any width while vector-effect keeps the stroke a constant 2px;
+   the walls draw themselves on load (pathLength + dashoffset). */
+.castle-title {
+  position: relative;
+  width: fit-content;
+  padding: 0.42em 0.32em 0.14em;
+}
+.castle-title .keep {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* the stroke straddles the box edge */
+  pointer-events: none;
+}
+.castle-title .keep path {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-walls 1.1s ease-out 0.2s forwards;
+}
+@keyframes draw-walls {
+  to { stroke-dashoffset: 0; }
+}
+.castle-title span {
+  display: inline-block;
+  animation: castle-rise 0.35s ease both;
+}
+.castle-title span:nth-child(2) { animation-delay: 0.05s; }
+.castle-title span:nth-child(3) { animation-delay: 0.1s; }
+.castle-title span:nth-child(4) { animation-delay: 0.15s; }
+.castle-title span:nth-child(5) { animation-delay: 0.2s; }
+.castle-title span:nth-child(6) { animation-delay: 0.25s; }
+.castle-title span:nth-child(7) { animation-delay: 0.3s; }
+@keyframes castle-rise {
+  from { opacity: 0; transform: translateY(0.22em); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Restated last and at full specificity: this game's tile animation
+   classes would otherwise out-rank the shared .tile.shake and mute the
+   reject shake (the Day 1 gotcha). submit() still clears shake first. */
+.crow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
