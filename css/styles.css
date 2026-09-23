@@ -1580,6 +1580,101 @@ body.stifle .key.cool {
   box-shadow: inset 0 0 0 2px var(--tile-border);
 }
 
+/* ---------- Hustle board (Day 10) ---------- */
+
+/* Page-scoped accent: safety orange — hurry up. Root --accent stays
+   Bundle's water blue. */
+body.hustle {
+  --accent: #ea580c;
+  --accent-soft: rgba(234, 88, 12, 0.11);
+}
+[data-theme="dark"] body.hustle {
+  --accent: #f97316;
+  --accent-soft: rgba(249, 115, 22, 0.14);
+}
+
+.hustle-game { max-width: 350px; }
+
+/* The clock sits above the board and is the page's whole scoreboard:
+   quiet before the run, full-strength while it ticks, the accent once
+   it's frozen on a win. tabular-nums keeps the digits from jittering. */
+.clock {
+  width: 100%;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--muted);
+  user-select: none;
+}
+.clock.running { color: var(--text); }
+.clock.done { color: var(--accent); }
+.clock-hint {
+  margin: 2px 0 12px;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.clock-hint.hidden { display: none; }
+.hustle-game .game-banner { margin-top: 14px; }
+
+/* Rows grow on demand inside the shared scroll window. */
+.hrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.hrow.quiet { animation: none; }
+
+/* The compressed reveal: same flip, 0.3s instead of 0.55s — the JS
+   timeline (FLIP_MID = 150) colors at this flip's half-turn. In a
+   speedrun, reveal time is clock time. */
+body.hustle .tile.reveal { animation-duration: 0.3s; }
+
+/* The title dashes in from the left, letter by letter, and two accent
+   speed lines streak in behind the word (the h1 shrinks to the word so
+   they trail the glyphs, not the page). */
+.hustle-title {
+  position: relative;
+  width: fit-content;
+}
+.hustle-title span {
+  display: inline-block;
+  animation: hst-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.hustle-title span:nth-child(2) { animation-delay: 0.04s; }
+.hustle-title span:nth-child(3) { animation-delay: 0.08s; }
+.hustle-title span:nth-child(4) { animation-delay: 0.12s; }
+.hustle-title span:nth-child(5) { animation-delay: 0.16s; }
+.hustle-title span:nth-child(6) { animation-delay: 0.2s; }
+@keyframes hst-in {
+  from { opacity: 0; transform: translateX(-0.45em) skewX(-14deg); }
+  to { opacity: 1; transform: none; }
+}
+.hustle-title::before,
+.hustle-title::after {
+  content: "";
+  position: absolute;
+  left: calc(100% + 0.14em);
+  height: 0.07em;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0;
+  animation: hst-streak 0.45s ease-out 0.3s forwards;
+}
+.hustle-title::before { top: 38%; width: 0.5em; }
+.hustle-title::after { top: 60%; width: 0.82em; animation-delay: 0.38s; }
+@keyframes hst-streak {
+  from { transform: translateX(-0.5em); opacity: 0; }
+  to { transform: none; opacity: 0.55; }
+}
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
