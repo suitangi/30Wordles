@@ -1835,9 +1835,13 @@ body.encircle {
 .erow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
 
 /* The title practices the game: the letters ride a ring, all drifting
-   east — each fades out past the last letter and seemingly re-enters
-   from the front. Per-child phases keep neighbours one glyph apart
-   (explicit delays, no calc — the Bubble gotcha). */
+   east — each fades out past the east end and seemingly re-enters from
+   the front. The word's TAIL leads (largest phase = east-most) so the
+   ring reads "Encircle" west to east and the letter that wraps is the
+   last one — like the game's shift. Negative delays spread the spawn:
+   the word is born already distributed along the band instead of
+   bunching at the west edge (per-child explicit values, no calc — the
+   Bubble gotcha). */
 .encircle-title {
   width: fit-content;
   padding: 0.1em 2.45em 0.18em 0.1em;
@@ -1845,16 +1849,16 @@ body.encircle {
 .encircle-title span {
   display: inline-block;
   will-change: transform, opacity;
-  animation: enc-flow 4.5s linear infinite both;
+  animation: enc-flow 7.2s linear infinite both;
 }
 .encircle-title span:nth-child(1) { animation-delay: 0s; }
-.encircle-title span:nth-child(2) { animation-delay: 0.56s; }
-.encircle-title span:nth-child(3) { animation-delay: 1.13s; }
-.encircle-title span:nth-child(4) { animation-delay: 1.69s; }
-.encircle-title span:nth-child(5) { animation-delay: 2.25s; }
-.encircle-title span:nth-child(6) { animation-delay: 2.81s; }
-.encircle-title span:nth-child(7) { animation-delay: 3.38s; }
-.encircle-title span:nth-child(8) { animation-delay: 3.94s; }
+.encircle-title span:nth-child(2) { animation-delay: -0.9s; }
+.encircle-title span:nth-child(3) { animation-delay: -1.8s; }
+.encircle-title span:nth-child(4) { animation-delay: -2.7s; }
+.encircle-title span:nth-child(5) { animation-delay: -3.6s; }
+.encircle-title span:nth-child(6) { animation-delay: -4.5s; }
+.encircle-title span:nth-child(7) { animation-delay: -5.4s; }
+.encircle-title span:nth-child(8) { animation-delay: -6.3s; }
 @keyframes enc-flow {
   0%   { transform: translateX(-2.4em); opacity: 0; }
   10%  { opacity: 1; }
