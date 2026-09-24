@@ -1941,6 +1941,104 @@ body.dawdle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .dwrow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Couple board (Day 14) ---------- */
+
+/* Page-scoped accent: plum — two things tied together. Root --accent
+   stays Bundle's water blue. */
+body.couple {
+  --accent: #7e22ce;
+  --accent-soft: rgba(126, 34, 206, 0.1);
+}
+[data-theme="dark"] body.couple {
+  --accent: #c084fc;
+  --accent-soft: rgba(192, 132, 252, 0.14);
+}
+
+.couple-game { max-width: 350px; }
+
+/* Rows grow on demand inside the shared scroll window. */
+.lrow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.lrow.quiet { animation: none; }
+
+/* The carried letter: chosen for you, wearing the couple's color until
+   its tile scores. It never erases. */
+.lrow .tile.carried {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* While you type, the row's LAST tile is the letter that will carry —
+   dashed accent says so (Bundle's chain-preview language). */
+.lrow.on .tile:nth-child(5) {
+  border-style: dashed;
+  border-color: var(--accent);
+}
+
+/* The coupler: one accent line that exits the previous row's last tile,
+   runs around the board's edge through the seam, and enters this row's
+   first tile — the lock moves from row-end to row-start. Two halves:
+   the source row draws the outgoing stub (::after), the receiving row
+   draws the seam run + incoming stub (::before). */
+.lrow.has-next::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  width: 9px;
+  height: calc(50% + 2.5px);
+  border-top: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+}
+.lrow.has-prev::before {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  left: 0;
+  right: -9px;
+  height: calc(50% + 2.5px);
+  border-top: 2px solid var(--accent);
+  border-left: 2px solid var(--accent);
+}
+
+/* The word comes out at last: the winning row glows down its line
+   (keyframes shared with Crumble/Swivel/Castle/Encircle/Dawdle). */
+.lrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title wears the same couple: the line exits the last letter,
+   wraps under the word and comes up into the first — C and e are the
+   tied pair and wear the accent. */
+.couple-title {
+  position: relative;
+  width: fit-content;
+  padding: 0 0.14em 0.5em;
+}
+.couple-title::after {
+  content: "";
+  position: absolute;
+  top: 54%;
+  bottom: 0.14em;
+  left: 0.08em;
+  right: 0.08em;
+  border-left: 2px solid var(--accent);
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.couple-title span:first-of-type,
+.couple-title span:last-of-type {
+  color: var(--accent);
+}
+
+/* Restated last and at full specificity: this game's animation classes
+   would otherwise out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.lrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
