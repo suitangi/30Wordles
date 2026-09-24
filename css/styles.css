@@ -1888,6 +1888,59 @@ body.encircle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .erow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Dawdle board (Day 13) ---------- */
+
+/* Page-scoped accent: dusk indigo — the clue that arrives after dark.
+   Root --accent stays Bundle's water blue. */
+body.dawdle {
+  --accent: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.1);
+}
+[data-theme="dark"] body.dawdle {
+  --accent: #818cf8;
+  --accent-soft: rgba(129, 140, 248, 0.14);
+}
+
+.dawdle-game { max-width: 350px; }
+
+/* Rows grow on demand inside the shared scroll window. */
+.dwrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.dwrow.quiet { animation: none; }
+
+/* The word comes out at last: the winning row glows down its line
+   (keyframes shared with Crumble/Swivel/Castle/Encircle). */
+.dwrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title dawdles in: each letter takes a full 1.6s to surface and
+   the next one doesn't even start for another 0.8s — the word takes six
+   seconds to fully arrive (per-child explicit delays, no calc — the
+   Bubble gotcha). A finite animation, so the global reduced-motion rule
+   lands it on the final frame: the word simply shows up. */
+.dawdle-title span {
+  display: inline-block;
+  animation: dawdle-in 1.6s ease-in both;
+}
+.dawdle-title span:nth-child(1) { animation-delay: 0.4s; }
+.dawdle-title span:nth-child(2) { animation-delay: 1.2s; }
+.dawdle-title span:nth-child(3) { animation-delay: 2s; }
+.dawdle-title span:nth-child(4) { animation-delay: 2.8s; }
+.dawdle-title span:nth-child(5) { animation-delay: 3.6s; }
+.dawdle-title span:nth-child(6) { animation-delay: 4.4s; }
+@keyframes dawdle-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Restated last and at full specificity: this game's animation classes
+   would otherwise out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.dwrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Keyboard ---------- */
 
 .keyboard {
