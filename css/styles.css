@@ -1834,42 +1834,50 @@ body.encircle {
    shared with Crumble/Swivel/Castle). */
 .erow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
 
-/* The title practices the game: the letters ride a ring, all drifting
-   east — each fades out past the east end and seemingly re-enters from
-   the front. The word's TAIL leads (largest phase = east-most) so the
-   ring reads "Encircle" west to east and the letter that wraps is the
-   last one — like the game's shift. Negative delays spread the spawn:
-   the word is born already distributed along the band instead of
-   bunching at the west edge (per-child explicit values, no calc — the
-   Bubble gotcha). */
+/* The title practices the game: the letters ride ONE shared track. Each
+   span is lifted out of the flow (absolute, same origin) and placed
+   purely by its transform, so neighbours keep an even one-slot pitch no
+   matter the glyph widths, and a letter only ever fades in at the west
+   edge of the band — never mid-word (an earlier per-span version wrapped
+   each letter around its OWN slot, spawning ghosts in the middle of the
+   word). The tail letter leads, so the ring reads "Encircle" west to
+   east and the letter that wraps is the last one — like the game's
+   shift. Per-child explicit delays, no calc — the Bubble gotcha. */
 .encircle-title {
-  width: fit-content;
-  padding: 0.1em 2.45em 0.18em 0.1em;
+  position: relative;
+  width: 4.9em;
+  height: 1.3em;
 }
 .encircle-title span {
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
   will-change: transform, opacity;
   animation: enc-flow 7.2s linear infinite both;
 }
-.encircle-title span:nth-child(1) { animation-delay: 0s; }
-.encircle-title span:nth-child(2) { animation-delay: -0.9s; }
-.encircle-title span:nth-child(3) { animation-delay: -1.8s; }
-.encircle-title span:nth-child(4) { animation-delay: -2.7s; }
-.encircle-title span:nth-child(5) { animation-delay: -3.6s; }
-.encircle-title span:nth-child(6) { animation-delay: -4.5s; }
-.encircle-title span:nth-child(7) { animation-delay: -5.4s; }
-.encircle-title span:nth-child(8) { animation-delay: -6.3s; }
+.encircle-title span:nth-child(1) { --k: 0; animation-delay: 0s; }
+.encircle-title span:nth-child(2) { --k: 1; animation-delay: -0.9s; }
+.encircle-title span:nth-child(3) { --k: 2; animation-delay: -1.8s; }
+.encircle-title span:nth-child(4) { --k: 3; animation-delay: -2.7s; }
+.encircle-title span:nth-child(5) { --k: 4; animation-delay: -3.6s; }
+.encircle-title span:nth-child(6) { --k: 5; animation-delay: -4.5s; }
+.encircle-title span:nth-child(7) { --k: 6; animation-delay: -5.4s; }
+.encircle-title span:nth-child(8) { --k: 7; animation-delay: -6.3s; }
 @keyframes enc-flow {
-  0%   { transform: translateX(-2.4em); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateX(2.4em); opacity: 0; }
+  0%   { transform: translateX(-0.6em); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateX(4.2em); opacity: 0; }
 }
 
 /* An infinite animation must not survive the global reduce rule (it would
-   machine-gun 0.01ms cycles): the ring stops and the word sits still. */
+   machine-gun 0.01ms cycles): the ring stops and the letters park in
+   reading position (--k places them one slot apart, west to east). */
 @media (prefers-reduced-motion: reduce) {
-  .encircle-title span { animation: none; }
+  .encircle-title span {
+    animation: none;
+    transform: translateX(calc(var(--k, 0) * 0.6em));
+  }
 }
 
 /* Restated last and at full specificity: this game's animation classes
