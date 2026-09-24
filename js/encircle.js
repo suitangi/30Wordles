@@ -3,14 +3,14 @@
 // progress is saved to localStorage, so a refresh resumes the same game.
 // Practice mode plays a random word without touching the daily save.
 //
-// A normal Wordle with nine guesses — except the answer sits on a RING.
+// A normal Wordle with seven guesses — except the answer sits on a RING.
 // Its first letter starts at a hidden tile and the rest wrap around the
 // end: display("modal", 2) reads "almod". Your guess is a ring too — the
 // ‹ › arrows (or ←/→) spin it around the board, and the marked tile is
 // your word's first letter. Spin before, during or after typing. Marks
 // score the tiles AS DISPLAYED, so five greens need the right word at the
 // right start: the correct word spun wrong reads as a ring of yellows.
-// Nine guesses; the ninth miss or give up is the loss.
+// Seven guesses; the seventh miss or give up is the loss.
 //
 // Marks are a pure function of (guess, its start, answer, its start), so
 // the save stores just { w, s } per guess and restore recomputes them.
@@ -18,7 +18,7 @@
   "use strict";
 
   var COLS = 5;
-  var ROWS = 9;
+  var ROWS = 7;
   var SALT = "encircle";  // daily hash salt — each variant salts its own way
   var FLIP_STAGGER = 280; // ms between tile flips
   var FLIP_MID = 270;     // half-turn point: the score color appears here
@@ -158,7 +158,7 @@
     paintPending();
   }
 
-  // Rows are built on demand — nine at most. Each carries its own pair of
+  // Rows are built on demand — seven at most. Each carries its own pair of
   // ring controls, visible only while the row is the live one.
   function addRow() {
     var row = document.createElement("div");
@@ -417,7 +417,7 @@
     } else {
       if (word === answer) toast("Right word \u2014 rotate it into place");
       if (guesses.length >= ROWS) {
-        done = true; // the ninth miss closes the ring for good
+        done = true; // the seventh miss closes the ring for good
         retireRows();
         showBanner(endBanner());
         shareBtn.classList.remove("hidden");
@@ -523,8 +523,8 @@
       absent: emptyCell };
     var n = guesses.length;
     var count = gaveUp
-      ? "gave up \u00B7 X/9"
-      : (won ? n : "X") + "/9";
+      ? "gave up \u00B7 X/7"
+      : (won ? n : "X") + "/7";
     var title = ["Encircle", practice ? "practice" : todayKey(), count]
       .join(" \u00B7 ");
     var lines = [title, GAME_URL];

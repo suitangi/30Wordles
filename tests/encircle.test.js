@@ -343,12 +343,12 @@ shareBtn.click();
   const SQ = "\u2B1C"; // light theme's absent square
   const GRN = "\uD83D\uDFE9";
   const YLW = "\uD83D\uDFE8";
-  assert.equal(lines[0], "Encircle · practice · 2/9", "practice share header");
+  assert.equal(lines[0], "Encircle · practice · 2/7", "practice share header");
   assert.equal(lines[1], GAME_URL, "share links to the game");
   assert.equal(lines[2], YLW.repeat(5), "the yellow ring");
   assert.equal(lines[3], GRN.repeat(5), "the closed circle");
 }
-console.log("ok — share: name · practice/date · N/9, URL, the displayed grid");
+console.log("ok — share: name · practice/date · N/7, URL, the displayed grid");
 
 // ---------- 10. every start is a win; the wrong one is all yellow --------------
 
@@ -396,26 +396,26 @@ typeRow("crane"); // aligned — the win
 assert.equal(banner.textContent, "Impressive \u2014 3 guesses", "three guesses, praised");
 console.log("ok — marks score the displayed tiles; the keyboard follows the typed letters");
 
-// ---------- 12. nine guesses: the ninth miss is the loss ------------------------
+// ---------- 12. seven guesses: the seventh miss is the loss ----------------
 
 ENC.practice("crane", 0);
-for (let i = 0; i < 9; i++) typeRow("hoist");
+for (let i = 0; i < 7; i++) typeRow("hoist");
 {
-  assert.equal(ENC.dump().done, true, "nine misses end it");
+  assert.equal(ENC.dump().done, true, "seven misses end it");
   assert.equal(ENC.dump().won, false, "not won");
   assert.equal(ENC.dump().gaveUp, false, "not a surrender — exhaustion");
   assert.equal(banner.textContent, "The word was CRANE", "the loss reveals the word");
-  assert.equal(board.children.length, 9, "no tenth row");
+  assert.equal(board.children.length, 7, "no eighth row");
   keydown("a");
-  assert.equal(ENC.dump().guesses.length, 9, "board locked");
+  assert.equal(ENC.dump().guesses.length, 7, "board locked");
 }
 shareBtn.click();
 {
   const ta = createdEls.filter((e) => e.tagName === "textarea").pop();
-  assert.equal(ta.value.split("\n")[0], "Encircle · practice · X/9",
-    "exhaustion tagged X/9 in the share");
+  assert.equal(ta.value.split("\n")[0], "Encircle · practice · X/7",
+    "exhaustion tagged X/7 in the share");
 }
-console.log("ok — the ninth miss loses: word revealed, board locked, X/9");
+console.log("ok — the seventh miss loses: word revealed, board locked, X/7");
 
 // ---------- 13. give up: the other loss ------------------------------------------
 
@@ -435,7 +435,7 @@ giveUpBtn.click();
 shareBtn.click();
 {
   const ta = createdEls.filter((e) => e.tagName === "textarea").pop();
-  assert.equal(ta.value.split("\n")[0], `Encircle · ${ENC.todayKey()} · gave up · X/9`,
+  assert.equal(ta.value.split("\n")[0], `Encircle · ${ENC.todayKey()} · gave up · X/7`,
     "surrender tagged in the share");
 }
 dailyGame();
@@ -513,7 +513,7 @@ assert.deepEqual(s.guesses, [], "guesses reset");
 
 const good = { date: ENC.todayKey(), answer: "crane", start: 2, guesses: [],
   done: false, won: false, gaveUp: false };
-const longGuesses = Array.from({ length: 10 }, () => ({ w: "hoist", s: 0 }));
+const longGuesses = Array.from({ length: 8 }, () => ({ w: "hoist", s: 0 }));
 for (const bad of [
   { ...good, answer: "qqqqq" },                        // not a word
   { ...good, answer: 42 },                              // not a string
@@ -527,7 +527,7 @@ for (const bad of [
   { ...good, guesses: [{ w: "qqqqq", s: 0 }] },        // non-word
   { ...good, guesses: [{ w: "crane" }] },              // no start on the guess
   { ...good, guesses: [{ w: "crane", s: 9 }] },        // guess start off the ring
-  { ...good, guesses: longGuesses },                    // more than nine
+  { ...good, guesses: longGuesses },                    // more than seven
 ]) {
   globalThis.localStorage.setItem("encircle-day12", JSON.stringify(bad));
   dailyGame();

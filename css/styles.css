@@ -1836,17 +1836,20 @@ body.encircle {
 
 /* The title practices the game: the letters ride ONE shared track. Each
    span is lifted out of the flow (absolute, same origin) and placed
-   purely by its transform, so neighbours keep an even one-slot pitch no
-   matter the glyph widths, and a letter only ever fades in at the west
-   edge of the band — never mid-word (an earlier per-span version wrapped
-   each letter around its OWN slot, spawning ghosts in the middle of the
-   word). The tail letter leads, so the ring reads "Encircle" west to
-   east and the letter that wraps is the last one — like the game's
-   shift. Per-child explicit delays, no calc — the Bubble gotcha. */
+   purely by its transform, and the word is set MONOSPACE so every glyph
+   has the same advance — at a uniform 0.75em pitch the visual gaps are
+   all equal (a proportional font left holes after the narrow i, r, l).
+   A letter only ever fades in at the west edge of the band — never
+   mid-word (an earlier per-span version wrapped each letter around its
+   OWN slot, spawning ghosts in the middle of the word). The tail letter
+   leads, so the ring reads "Encircle" west to east and the letter that
+   wraps is the last one — like the game's shift. Per-child explicit
+   delays, no calc — the Bubble gotcha. */
 .encircle-title {
   position: relative;
-  width: 4.9em;
+  width: 5.9em;
   height: 1.3em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 .encircle-title span {
   position: absolute;
@@ -1864,10 +1867,10 @@ body.encircle {
 .encircle-title span:nth-child(7) { --k: 6; animation-delay: -5.4s; }
 .encircle-title span:nth-child(8) { --k: 7; animation-delay: -6.3s; }
 @keyframes enc-flow {
-  0%   { transform: translateX(-0.6em); opacity: 0; }
+  0%   { transform: translateX(-0.3em); opacity: 0; }
   8%   { opacity: 1; }
   92%  { opacity: 1; }
-  100% { transform: translateX(4.2em); opacity: 0; }
+  100% { transform: translateX(5.7em); opacity: 0; }
 }
 
 /* An infinite animation must not survive the global reduce rule (it would
@@ -1876,7 +1879,7 @@ body.encircle {
 @media (prefers-reduced-motion: reduce) {
   .encircle-title span {
     animation: none;
-    transform: translateX(calc(var(--k, 0) * 0.6em));
+    transform: translateX(calc(var(--k, 0) * 0.75em));
   }
 }
 
