@@ -1771,15 +1771,16 @@ body.castle {
 
 /* ---------- Encircle board (Day 12) ---------- */
 
-/* Page-scoped accent: deep teal — a compass ring. Root --accent stays
-   Bundle's water blue. */
+/* Page-scoped accent: hot magenta — the ring around the board. Root
+   --accent stays Bundle's water blue. (First ship wore a teal that
+   collided with Toggle's — re-accented.) */
 body.encircle {
-  --accent: #0f766e;
-  --accent-soft: rgba(15, 118, 110, 0.1);
+  --accent: #c026d3;
+  --accent-soft: rgba(192, 38, 211, 0.1);
 }
 [data-theme="dark"] body.encircle {
-  --accent: #2dd4bf;
-  --accent-soft: rgba(45, 212, 191, 0.14);
+  --accent: #e879f9;
+  --accent-soft: rgba(232, 121, 249, 0.14);
 }
 
 .encircle-game { max-width: 350px; }
