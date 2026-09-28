@@ -2133,6 +2133,101 @@ body.couple {
 }
 .toast.show { opacity: 1; }
 
+/* ---------- Muddle board (Day 15) ---------- */
+
+/* Page-scoped accent: honey gold — the muddled yellow's warmer cousin.
+   Root --accent stays Bundle's water blue. */
+body.muddle {
+  --accent: #a16207;
+  --accent-soft: rgba(161, 98, 7, 0.12);
+}
+[data-theme="dark"] body.muddle {
+  --accent: #facc15;
+  --accent-soft: rgba(250, 204, 21, 0.14);
+}
+
+.muddle-game { max-width: 380px; }
+.muddle-game .game-banner { margin: 16px 0 18px; }
+
+/* The honeycomb: seven staggered rows of pointy-top hexes (5, 4, 5, 4,
+   5, 4, 5), absolutely positioned by JS inside the board box. A hex tile
+   is two stacked clip-path hexagons — the outer one paints the border
+   color, the inner one (inset 2px) the fill — because clip-path would
+   clip a real border off. The inner carries the letter and the mark. */
+.muddle-board { position: relative; margin: 0 auto; }
+.mrow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.mrow.quiet { animation: none; }
+.hex {
+  position: absolute;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: var(--tile-border);
+}
+.hex-in {
+  position: absolute;
+  inset: 2px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: var(--surface);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: background-color 0.45s ease;
+}
+
+.hex-in.correct { background: var(--correct); color: var(--on-color); }
+.hex-in.present { background: var(--present); color: var(--on-color); }
+.hex-in.absent { background: var(--absent); color: var(--on-color); }
+/* Colorblind marks: same mechanism as the shared .tile rules (the
+   .hex-in classes don't match .tile, so they need their own lines). */
+[data-colorblind="on"] .hex-in.correct { background: var(--cb-correct); }
+[data-colorblind="on"] .hex-in.present { background: var(--cb-present); }
+
+/* The flip: same two-phase language as Bundle — the mark color lands at
+   the half-turn (JS swaps it at FLIP_MID). */
+.hex.reveal { animation: hex-flip 0.65s ease; }
+@keyframes hex-flip {
+  0% { transform: rotateX(0); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
+}
+
+/* The winning row glows across its hexes (keyframes shared with
+   Crumble/Swivel/Castle/Encircle/Dawdle/Couple). */
+.hex.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* Restored boards are born resolved: hexes rebuilt from the save carry
+   `quiet` — no reveal, no glow replay. paintTile strips it from hexes it
+   repaints, so later rows still flip. */
+.hex.quiet { animation: none; }
+
+/* Restated last and at full specificity: this game's own animation
+   classes would otherwise out-rank the shared .tile.shake and mute the
+   reject shake (the Day 1 gotcha). submit() still clears shake before
+   revealing. */
+.hex.shake { animation: shake 0.55s ease; }
+
+/* The title: the two d's of Muddle are one d sitting in a hexagon —
+   wearing the muddled yellow, the board's clue in miniature. */
+.muddle-title span { display: inline-block; }
+.muddle-title .mhex {
+  width: 0.88em;
+  height: 1em;
+  margin: 0 0.03em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: var(--present);
+  color: var(--on-color);
+  animation: mhex-in 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) 0.35s both;
+}
+@keyframes mhex-in {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
