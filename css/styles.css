@@ -2155,8 +2155,11 @@ body.muddle {
    color, the inner one (inset 2px) the fill — because clip-path would
    clip a real border off. The inner carries the letter and the mark. */
 .muddle-board { position: relative; margin: 0 auto; }
-.mrow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-.mrow.quiet { animation: none; }
+/* Scoped to the honeycomb board: Meddle (Day 5) also names its rows
+   .mrow — unscoped, this rule dragged every Meddle guess row to the top
+   of the page, absolute and full-size (suitangi, post-Day-16 report). */
+.muddle-board .mrow { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.muddle-board .mrow.quiet { animation: none; }
 .hex {
   position: absolute;
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
