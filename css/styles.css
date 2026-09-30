@@ -2426,6 +2426,125 @@ body.peddle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .prow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Fiddle board (Day 17) ---------- */
+
+/* Page-scoped accent: steel — a fidgety pencil-metal gray-blue, the one
+   hue family no earlier day had claimed. Root --accent stays Bundle's
+   water blue. */
+body.fiddle {
+  --accent: #475569;
+  --accent-soft: rgba(71, 85, 105, 0.1);
+}
+[data-theme="dark"] body.fiddle {
+  --accent: #94a3b8;
+  --accent-soft: rgba(148, 163, 184, 0.16);
+}
+
+.fiddle-game { max-width: 380px; }
+.fiddle-game .game-banner { margin-top: 14px; }
+
+/* Rows grow on demand inside the shared scroll window; the extra
+   right-hand column is the fiddle counter — letters still owed to the
+   previous guess, ticking down as they're typed, the check (accent)
+   once the fiddle is satisfied. flex: none, like Subtle's .srow —
+   without it the scroll window flex-shrinks the rows once the game
+   outgrows it and the boards squish. */
+.fdrow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 44px;
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.fdrow.quiet { animation: none; }
+
+.fcount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  user-select: none;
+}
+.fcount.ok { color: var(--accent); }
+.fcount.settle { animation: settle 0.45s ease; }
+
+/* While you type, tiles whose letter counts toward the previous guess
+   wear the steel outline — the counter's math made visible, so the
+   shared letters can be seen and counted at a glance. Pending-row voice
+   only: it would fight the mark colors on scored rows, so submit()
+   strips it before the reveal (it would out-rank .tile.correct). */
+.fdrow .tile.shared {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* The winning row glows down its line (keyframes shared with
+   Crumble/Swivel/Castle/Encircle/Dawdle/Couple/Muddle/Peddle). */
+.fdrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title fidgets: F-i-d rise in, and the last three letters — d, l,
+   e — continuously type themselves out and backspace themselves away,
+   like a word being fidgeted with on a keyboard. One timeline, three
+   explicit keyframe sets: each letter pops in a keystroke after the
+   last (d at 0s, l at 0.22s, e at 0.44s of the 3.6s cycle) and ALL
+   vanish backspace-order (e first, then l, then d) because their
+   disappearances are staggered the other way (66%/72%/78%). One-shot
+   reduced-motion rule HERE, section-scoped: the global reduce rule only
+   shortens durations, and a 0.01ms INFINITE animation machine-guns
+   (the Encircle lesson) — these letters must simply sit still, whole. */
+.fiddle-title > span:not(.fd) { display: inline-block; animation: fiddle-rise 0.35s ease both; }
+.fiddle-title > span:not(.fd):nth-child(2) { animation-delay: 0.05s; }
+.fiddle-title > span:not(.fd):nth-child(3) { animation-delay: 0.1s; }
+.fiddle-title > span:not(.fd):nth-child(4) { animation-delay: 0.15s; }
+.fiddle-title .fd {
+  display: inline-block;
+  opacity: 0;
+  animation-duration: 3.6s;
+  animation-timing-function: linear;
+  animation-delay: 1s;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+.fiddle-title .fd-d { animation-name: fd-cycle-d; }
+.fiddle-title .fd-l { animation-name: fd-cycle-l; }
+.fiddle-title .fd-e { animation-name: fd-cycle-e; }
+@keyframes fd-cycle-d {
+  0% { opacity: 0; transform: translateY(0.14em); }
+  3% { opacity: 1; transform: none; }
+  75% { opacity: 1; transform: none; }
+  78% { opacity: 0; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes fd-cycle-l {
+  0%, 6% { opacity: 0; transform: translateY(0.14em); }
+  9% { opacity: 1; transform: none; }
+  69% { opacity: 1; transform: none; }
+  72% { opacity: 0; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes fd-cycle-e {
+  0%, 12% { opacity: 0; transform: translateY(0.14em); }
+  15% { opacity: 1; transform: none; }
+  63% { opacity: 1; transform: none; }
+  66% { opacity: 0; transform: none; }
+  100% { opacity: 0; }
+}
+@keyframes fiddle-rise {
+  from { opacity: 0; transform: translateY(0.22em); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fiddle-title .fd { animation: none; opacity: 1; transform: none; }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.fdrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
