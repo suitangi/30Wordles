@@ -2545,6 +2545,100 @@ body.fiddle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .fdrow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Cycle board (Day 18) ---------- */
+
+/* Page-scoped accent: the tile green itself — the page wears the board's
+   color, since the game has no hue of its own (every family is claimed).
+   Root --accent stays Bundle's water blue. */
+body.cycle {
+  --accent: #6aaa64;
+  --accent-soft: rgba(106, 170, 100, 0.15);
+}
+[data-theme="dark"] body.cycle {
+  --accent: #538d4e;
+  --accent-soft: rgba(83, 141, 78, 0.2);
+}
+
+.cycle-game { max-width: 380px; }
+.cycle-game .game-banner { margin-top: 14px; }
+
+/* Rows grow on demand inside the shared scroll window; the extra
+   right-hand column is the mode chip — a mini tile saying which mode
+   that guess scored in, or for the waiting row, which mode the guess
+   you're typing will score in. flex: none, like Subtle's .srow —
+   without it the scroll window flex-shrinks the rows once the game
+   outgrows it and the boards squish. */
+.cycrow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 44px;
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.cycrow.quiet { animation: none; }
+
+/* The mode chip: a mini tile in the mode's color, letter G or Y.
+   Scored rows recede; the waiting row's chip stands at full strength
+   with a soft ring — that's the mode you're typing into. */
+.cmode {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 750;
+  line-height: 1;
+  color: var(--on-color);
+  user-select: none;
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+}
+.cmode.g { background: var(--correct); }
+.cmode.y { background: var(--present); }
+[data-colorblind="on"] .cmode.g { background: var(--cb-correct); }
+[data-colorblind="on"] .cmode.y { background: var(--cb-present); }
+.cycrow:not(.on-row) .cmode { opacity: 0.55; }
+.cycrow.on-row .cmode { box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* The winning row glows down its line (keyframes shared with
+   Crumble/Swivel/Castle/Encircle/Dawdle/Couple/Muddle/Peddle/Fiddle). */
+.cycrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title cycles: the letters wash back and forth between the two clue
+   colors, green and yellow — a phase-offset wave rolling through the
+   word (negative delays; no calc-in-delay, the Bubble gotcha). The
+   animation reads the mark palette vars, so it follows dark/light for
+   free; colorblind mode gets its own keyframes so the title matches the
+   board's orange/blue. Infinite, so reduced-motion is handled HERE:
+   the global reduce rule only shortens durations and a 0.01ms INFINITE
+   animation machine-guns (the Encircle lesson) — the title settles
+   plain. */
+.cycle-title span { display: inline-block; animation: cycle-hue 2.8s ease-in-out infinite; }
+.cycle-title span:nth-child(2) { animation-delay: -0.28s; }
+.cycle-title span:nth-child(3) { animation-delay: -0.56s; }
+.cycle-title span:nth-child(4) { animation-delay: -0.84s; }
+.cycle-title span:nth-child(5) { animation-delay: -1.12s; }
+@keyframes cycle-hue {
+  0%, 100% { color: var(--correct); }
+  50% { color: var(--present); }
+}
+[data-colorblind="on"] .cycle-title span { animation-name: cycle-hue-cb; }
+@keyframes cycle-hue-cb {
+  0%, 100% { color: var(--cb-correct); }
+  50% { color: var(--cb-present); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cycle-title span { animation: none; color: var(--text); }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.cycrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
