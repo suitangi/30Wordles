@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-  <title>Day 20 — 30 Wordles</title>
+  <title>Day 20 · Scramble — 30 Wordles</title>
   <link rel="stylesheet" href="../../css/styles.css">
   <script>
     (function () {
@@ -14,29 +14,50 @@
         t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       }
       document.documentElement.dataset.theme = t;
+
+      try { if (localStorage.getItem("30wordles-colorblind") === "on") document.documentElement.dataset.colorblind = "on"; } catch (e) {}
     })();
   </script>
 </head>
-<body>
+<body class="scramble">
 
   <header class="site-header">
     <a class="wordmark" href="../../index.html">30 <span>Wordles</span></a>
-    <button class="theme-toggle" type="button" aria-label="Toggle color theme">
+    <div class="header-actions">
+      <button class="circle-btn" id="cb-toggle" type="button" aria-label="Toggle colorblind mode" aria-pressed="false" title="Colorblind mode: orange / blue marks">
+        <svg class="icon-cb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="circle-btn theme-toggle" type="button" aria-label="Toggle dark / light theme" title="Toggle dark / light theme">
+
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
+    </div>
   </header>
 
   <main class="page narrow">
     <p class="eyebrow">Day 20</p>
-    <h1>Coming soon</h1>
-    <p class="lede">The Day 20 game doesn't exist yet. It lands here when its day comes.</p>
-    <div class="soon-tiles" aria-hidden="true">
-      <div class="tile"></div>
-      <div class="tile"></div>
-      <div class="tile"></div>
-      <div class="tile"></div>
-      <div class="tile"></div>
+    <h1 class="scramble-title" aria-label="Scramble"><span>S</span><span>c</span><span>r</span><span>a</span><span>m</span><span>b</span><span>l</span><span>e</span></h1>
+    <p class="lede">Your letters are dealt to every row scrambled — crack your own shuffle.</p>
+
+    <section class="rules">
+      <h2>Rules</h2>
+      <ul>
+        <li>Every row deals your letters its own way — the <strong>little number</strong> on each tile is the typed slot that tile takes.</li>
+        <li>Type in the strip above the board: the letters <strong>deal themselves onto the waiting row live</strong>. Enter flips the deal, and <strong>the scrambled word is what's judged.</strong> 6 guesses.</li>
+        <li>5 greens to win. Typing <strong>the answer itself</strong> always ends it — the scramble lifts and the word lands in order.</li>
+      </ul>
+    </section>
+
+    <div class="game scramble-game">
+      <div class="sentry" id="entry" aria-label="Your guess"></div>
+      <div class="scboard" id="board" aria-label="Scramble board"></div>
+      <div class="game-actions">
+        <button class="btn" id="new-btn" type="button">Practice</button>
+        <button class="btn" id="giveup-btn" type="button">Give up</button>
+        <button class="btn primary hidden" id="share-btn" type="button">Share result</button>
+      </div>
+      <div class="keyboard" id="keyboard"></div>
     </div>
 
     <nav class="day-nav" aria-label="More days">
@@ -47,6 +68,11 @@
 
   <footer class="site-footer">30Wordle: Made with 💙 by Suitangi</footer>
 
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="../../js/words.js"></script>
+  <script src="../../js/scramble.js"></script>
+  <script src="../../js/colorblind.js"></script>
   <script src="../../js/theme.js"></script>
 </body>
 </html>

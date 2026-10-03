@@ -2786,6 +2786,169 @@ body.findle {
   .findle-title span { animation: none; color: var(--text); }
 }
 
+/* ---------- Scramble board (Day 20) ---------- */
+
+/* Page-scoped accent: emerald — the mid-spring slot was the last free
+   green (Peddle's money-green sits ~15° toward yellow, Toggle's teal ~15°
+   toward blue; audited before shipping). Root --accent stays Bundle's
+   water blue. */
+body.scramble {
+  --accent: #047857;
+  --accent-soft: rgba(4, 120, 87, 0.12);
+}
+[data-theme="dark"] body.scramble {
+  --accent: #34d399;
+  --accent-soft: rgba(52, 211, 153, 0.16);
+}
+
+.scramble-game { max-width: 380px; }
+
+/* The entry strip sits above the board: plain slots in typed order —
+   dealing the letters to the numbered tiles is the board's job. The
+   wider seam below separates the typing from the dealt rows. Both need
+   width: 100% like every board container — inside the centered .game
+   flex they shrink-wrap, and empty 1fr tiles collapse to their borders
+   (the first ship's 3.2px-tiles bug). */
+.sentry {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.scboard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.scrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+.scrow .tile { position: relative; }
+
+/* The deal, printed on the board: the little number in each tile's top
+   corner is the typed slot that tile takes. Waiting row's numbers stand
+   at full strength in the accent; scored rows' numbers recede onto the
+   mark color. */
+.slot-num {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+  user-select: none;
+}
+.scrow.on-row .slot-num { color: var(--accent); opacity: 1; }
+.scrow .tile.correct .slot-num,
+.scrow .tile.present .slot-num,
+.scrow .tile.absent .slot-num { color: var(--on-color); opacity: 0.75; }
+
+/* The lift: a typed answer lands in order, so its row's numbers would
+   lie — fade them out with the win. */
+.scrow.unscrambled .tile .slot-num { opacity: 0; }
+
+/* The winning row glows down its line (keyframes shared with every day). */
+.scrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title can't sit still: all eight letters slide to a fresh
+   arrangement every 1.6s, forever. Monospace so one letter = 1ch and the
+   slot offsets are exact; per-letter keyframes carry each letter through
+   the shuffle — all letters move together, which is what a scramble is.
+   Infinite, so reduced-motion is handled HERE section-scoped: the global
+   reduce rule only shortens durations and a 0.01ms INFINITE animation
+   machine-guns (the Encircle lesson) — the title must sit still. */
+.scramble-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0;
+}
+.scramble-title span {
+  display: inline-block;
+  animation-duration: 6.4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.scramble-title span:nth-child(1) { animation-name: scr-0; }
+.scramble-title span:nth-child(2) { animation-name: scr-1; }
+.scramble-title span:nth-child(3) { animation-name: scr-2; }
+.scramble-title span:nth-child(4) { animation-name: scr-3; }
+.scramble-title span:nth-child(5) { animation-name: scr-4; }
+.scramble-title span:nth-child(6) { animation-name: scr-5; }
+.scramble-title span:nth-child(7) { animation-name: scr-6; }
+.scramble-title span:nth-child(8) { animation-name: scr-7; }
+@keyframes scr-0 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(2ch); }
+  50% { transform: translateX(4ch); }
+  75% { transform: translateX(1ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-1 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-1ch); }
+  50% { transform: translateX(4ch); }
+  75% { transform: translateX(-1ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-2 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(1ch); }
+  50% { transform: translateX(-2ch); }
+  75% { transform: translateX(3ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-3 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2ch); }
+  50% { transform: translateX(-2ch); }
+  75% { transform: translateX(1ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-4 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(2ch); }
+  50% { transform: translateX(-2ch); }
+  75% { transform: translateX(-1ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-5 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-1ch); }
+  50% { transform: translateX(-2ch); }
+  75% { transform: translateX(-3ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-6 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(1ch); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(1ch); }
+  100% { transform: translateX(0); }
+}
+@keyframes scr-7 {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2ch); }
+  50% { transform: translateX(0); }
+  75% { transform: translateX(-1ch); }
+  100% { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scramble-title span { animation: none; }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.scrow .tile.shake { animation: shake 0.55s ease; }
+.sentry.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
