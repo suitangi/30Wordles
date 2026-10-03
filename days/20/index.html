@@ -38,19 +38,20 @@
   <main class="page narrow">
     <p class="eyebrow">Day 20</p>
     <h1 class="scramble-title" aria-label="Scramble"><span>S</span><span>c</span><span>r</span><span>a</span><span>m</span><span>b</span><span>l</span><span>e</span></h1>
-    <p class="lede">Your letters are dealt to every row scrambled — crack your own shuffle.</p>
+    <p class="lede">Your guesses are scrambled in its own way.</p>
 
     <section class="rules">
       <h2>Rules</h2>
       <ul>
-        <li>Every row deals your letters its own way — the <strong>little number</strong> on each tile is the typed slot that tile takes.</li>
-        <li>Type in the strip above the board: the letters <strong>deal themselves onto the waiting row live</strong>. Enter flips the deal, and <strong>the scrambled word is what's judged.</strong> 6 guesses.</li>
-        <li>5 greens to win. Typing <strong>the answer itself</strong> always ends it — the scramble lifts and the word lands in order.</li>
+        <li>Every row scrambles letters its own way — the <strong>number</strong> on each tile is the typed slot that tile takes.</li>
+        <li>Type in the space above the board, and see a preview of the scrambling. Enter your guess and it gets scrambled. 6 guesses.</li>
+        <li>5 greens to win. Typing <strong>the answer itself</strong> always wins — no need to try to scramble into the answer.</li>
       </ul>
     </section>
 
     <div class="game scramble-game">
       <div class="sentry" id="entry" aria-label="Your guess"></div>
+      <div class="deal-line" aria-hidden="true"></div>
       <div class="scboard" id="board" aria-label="Scramble board"></div>
       <div class="game-actions">
         <button class="btn" id="new-btn" type="button">Practice</button>
