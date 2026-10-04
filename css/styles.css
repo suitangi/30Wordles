@@ -2957,6 +2957,149 @@ body.scramble {
 .scrow .tile.shake { animation: shake 0.55s ease; }
 .sentry.shake { animation: shake 0.55s ease; }
 
+/* ---------- Tuple board (Day 21) ---------- */
+
+/* Page-scoped accent: graphite — the colorless game wears gray. Warm
+   stone against Fiddle's cool blue-slate steel (the only other neutral;
+   every hue family was long claimed). Root --accent stays Bundle's
+   water blue. */
+body.tuple {
+  --accent: #57534e;
+  --accent-soft: rgba(87, 83, 78, 0.12);
+}
+[data-theme="dark"] body.tuple {
+  --accent: #d6d3d1;
+  --accent-soft: rgba(214, 211, 209, 0.14);
+}
+
+.tuple-game { max-width: 380px; }
+
+/* Rows grow on demand inside the shared scroll window — nine deep; the
+   extra right-hand column is the tuple, the game's whole voice.
+   flex: none like every row in the scroll window (it flex-shrinks
+   otherwise, the Peddle lesson). */
+.tuprow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 80px;
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.tuprow.quiet { animation: none; }
+
+/* The tuple: [yellows, greens] — two number tiles wearing the mark
+   colors, framed in the tuple's literal brackets. This is the only
+   color on the board. Scored rows wear it; the waiting row shows
+   NOTHING — a live tuple would be a free probe (type, read, backspace,
+   repeat), and the guess is the unit of measurement here. */
+.ttup {
+  grid-column: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  user-select: none;
+}
+.tsep {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted);
+}
+.tnum {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1;
+  color: var(--on-color);
+}
+.tnum.y { background: var(--present); }
+.tnum.g { background: var(--correct); }
+[data-colorblind="on"] .tnum.y { background: var(--cb-present); }
+[data-colorblind="on"] .tnum.g { background: var(--cb-correct); }
+
+/* The numbers land as the flips settle — the row's would-be colors
+   collapsing into two numbers, yellows first, greens half a beat later.
+   Restored rows never wear .pop: boards are born finished. */
+.ttup.pop .tnum { animation: tup-pop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.ttup.pop .tnum.g { animation-delay: 0.14s; }
+.ttup.pop .tsep { animation: tup-sep 0.24s ease both; }
+@keyframes tup-pop {
+  from { transform: scale(0.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes tup-sep {
+  from { opacity: 0; }
+}
+
+/* The ghost answer: the loss reveal — the answer walks on wearing its
+   own [0, 5], tinted in the page's graphite so it reads as reveal, not
+   guess. */
+.tuprow.answer .tile {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* The winning row glows down its line (keyframes shared with every
+   day); the ghost answer glows too — both say "this row is the word". */
+.tuprow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title wears the game's own notation: [Tup,le] — brackets and
+   comma as muted punctuation, Tup on yellow tiles, le on green, the
+   same number tiles the board answers with. Rise-in is one-shot, so
+   the global reduced-motion rule lands it finished (no section-scoped
+   rule needed — that's for INFINITE animations, the Encircle lesson). */
+.tuple-title { white-space: nowrap; }
+.tuple-title > span {
+  display: inline-block;
+  animation: tup-rise 0.45s ease both;
+}
+.tuple-title > span:nth-child(1) { animation-delay: 0s; }
+.tuple-title > span:nth-child(2) { animation-delay: 0.06s; }
+.tuple-title > span:nth-child(3) { animation-delay: 0.12s; }
+.tuple-title > span:nth-child(4) { animation-delay: 0.18s; }
+.tuple-title > span:nth-child(5) { animation-delay: 0.24s; }
+.tuple-title > span:nth-child(6) { animation-delay: 0.3s; }
+.tuple-title > span:nth-child(7) { animation-delay: 0.36s; }
+.tuple-title > span:nth-child(8) { animation-delay: 0.42s; }
+@keyframes tup-rise {
+  from { opacity: 0; transform: translateY(0.3em) scale(0.7); }
+}
+.tuple-title .tup-y,
+.tuple-title .tup-g {
+  /* Letter-in-a-shape, per the Muddle hex / Bubble bubble mechanics:
+     inline-flex so the chip's baseline IS the glyph's baseline (the
+     brackets and comma stay on it; no vertical-align nudge to fight).
+     The box must be taller than the inherited line-height AND hold a
+     descender — the first ship's 0.94em box let the p sink out the
+     bottom (Muddle's d has no descender; this word does) — so 1.1em
+     with line-height: 1 to keep the line box inside. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  width: 1.05em;
+  height: 1.1em;
+  border-radius: 0.15em;
+  margin: 0 0.015em;
+  color: var(--on-color);
+}
+.tuple-title .tup-y { background: var(--present); }
+.tuple-title .tup-g { background: var(--correct); }
+[data-colorblind="on"] .tuple-title .tup-y { background: var(--cb-present); }
+[data-colorblind="on"] .tuple-title .tup-g { background: var(--cb-correct); }
+.tuple-title .tbr,
+.tuple-title .tcm { color: var(--muted); font-weight: 600; }
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.tuprow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
