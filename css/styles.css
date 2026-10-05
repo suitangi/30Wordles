@@ -3100,6 +3100,88 @@ body.tuple {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .tuprow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Middle board (Day 22) ---------- */
+
+/* Page-scoped accent: the tile green itself — the game's soul is the
+   green midpoint between gray and yellow (Cycle's precedent: every hue
+   family is claimed, so the page wears the board's color). Root
+   --accent stays Bundle's water blue. */
+body.middle {
+  --accent: #6aaa64;
+  --accent-soft: rgba(106, 170, 100, 0.15);
+}
+[data-theme="dark"] body.middle {
+  --accent: #538d4e;
+  --accent-soft: rgba(83, 141, 78, 0.2);
+}
+
+.middle-game { max-width: 380px; }
+
+/* Rows grow on demand inside the shared scroll window — the clues are
+   the tiles' own marks, so this is the plain five-tile grid. Scoped to
+   the game: Meddle AND Muddle own an .mrow each, the Day-15 CSS-leak
+   lesson. */
+.midrow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.midrow.quiet { animation: none; }
+
+/* The winning row glows down its line (keyframes shared with every
+   day); the loss's all-green ghost row wears it too. */
+.midrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title sits on its own thermometer: a strip under the word running
+   gray → green → yellow across the alphabet, green parked in the
+   hard-stopped middle — the whole game in one bar. The h1 must be
+   fit-content: gradient % stops map to the ELEMENT box, so a full-width
+   h1 would stretch the bar across the page (the fade-title gotcha).
+   Colorblind mode swaps orange/blue in; gray stays gray, like the
+   board's marks. Static, so the global reduced-motion rule is enough. */
+.middle-title {
+  position: relative;
+  width: fit-content;
+  padding-bottom: 10px;
+}
+.middle-title > span {
+  display: inline-block;
+  animation: mid-rise 0.45s ease both;
+}
+.middle-title > span:nth-child(1) { animation-delay: 0s; }
+.middle-title > span:nth-child(2) { animation-delay: 0.06s; }
+.middle-title > span:nth-child(3) { animation-delay: 0.12s; }
+.middle-title > span:nth-child(4) { animation-delay: 0.18s; }
+.middle-title > span:nth-child(5) { animation-delay: 0.24s; }
+.middle-title > span:nth-child(6) { animation-delay: 0.3s; }
+@keyframes mid-rise {
+  from { opacity: 0; transform: translateY(0.3em); }
+}
+.middle-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    var(--absent) 0%, var(--correct) 44%, var(--correct) 56%,
+    var(--present) 100%);
+}
+[data-colorblind="on"] .middle-title::after {
+  background: linear-gradient(90deg,
+    var(--absent) 0%, var(--cb-correct) 44%, var(--cb-correct) 56%,
+    var(--cb-present) 100%);
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.midrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
