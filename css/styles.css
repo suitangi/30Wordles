@@ -3182,6 +3182,159 @@ body.middle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .midrow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Mingle board (Day 23) ---------- */
+
+/* Page-scoped accent: the tile green, third wear (Cycle, Middle) — the
+   minesweeper palette itself collides with every claimed accent family
+   (blue→Castle, red→Stifle, indigo→Dawdle), so the page wears the
+   board's green, the palette's centerpiece score. Root --accent stays
+   Bundle's water blue. */
+body.mingle {
+  --accent: #6aaa64;
+  --accent-soft: rgba(106, 170, 100, 0.15);
+}
+[data-theme="dark"] body.mingle {
+  --accent: #538d4e;
+  --accent-soft: rgba(83, 141, 78, 0.2);
+}
+
+/* The score palette in heat order (suitangi, v3): 0 gray, 1 red,
+   2 yellow, 3 blue, 4 green — green means the best neighbors. 2 and 4
+   wear the Wordle mark values themselves (theme-proven); 0 needs no
+   var — the tile's own filled border already says "scored, nothing
+   here". */
+body.mingle {
+  --ms1: #dc2626;
+  --ms2: var(--present);
+  --ms3: #2563eb;
+  --ms4: var(--correct);
+}
+[data-theme="dark"] body.mingle {
+  --ms1: #f87171;
+  --ms3: #60a5fa;
+}
+
+.mingle-game { max-width: 380px; }
+
+/* The score chart, above the board (the Peddle price-chart slot): five
+   outline swatches with their numbers in, so the palette needs no
+   guessing — and the numbers double as the colorblind reading. */
+.mschart {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+.mschart .msc {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--tile-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1;
+  color: var(--muted);
+  user-select: none;
+}
+.mschart .msc.sc1 { border-color: var(--ms1); color: var(--ms1); }
+.mschart .msc.sc2 { border-color: var(--ms2); color: var(--ms2); }
+.mschart .msc.sc3 { border-color: var(--ms3); color: var(--ms3); }
+.mschart .msc.sc4 { border-color: var(--ms4); color: var(--ms4); }
+.mscaption {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* Rows grow on demand inside the shared scroll window — plain
+   five-tile rows; the outline carries everything. */
+.mingrow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.mingrow.quiet { animation: none; }
+
+/* The mingle scores ride the tile's own border, in heat order: 1 red,
+   2 yellow, 3 blue, 4 green; 0 lets the filled border stand. The
+   letters stay neutral — the outline is the whole message. */
+.mingrow .tile.sc1 { border-color: var(--ms1); }
+.mingrow .tile.sc2 { border-color: var(--ms2); }
+.mingrow .tile.sc3 { border-color: var(--ms3); }
+.mingrow .tile.sc4 { border-color: var(--ms4); }
+
+/* Colorblind mode: a five-color scale can't orange/blue-swap, so the
+   score shows as its number — minesweeper prints its numbers too. The
+   digit rides ::after, keyed off the score class, corner-seated like
+   Scramble's slot numbers; waiting tiles (no sc class) print nothing. */
+.mingrow .tile { position: relative; }
+[data-colorblind="on"] .mingrow .tile::after {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted);
+  user-select: none;
+}
+[data-colorblind="on"] .mingrow .tile.sc1::after { content: "1"; color: var(--ms1); }
+[data-colorblind="on"] .mingrow .tile.sc2::after { content: "2"; color: var(--ms2); }
+[data-colorblind="on"] .mingrow .tile.sc3::after { content: "3"; color: var(--ms3); }
+[data-colorblind="on"] .mingrow .tile.sc4::after { content: "4"; color: var(--ms4); }
+
+/* The winning row glows down its line (keyframes shared with every
+   day); the ghost answer wears it too. */
+.mingrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title already knows the game: six letters in outline-only tiles,
+   wearing a real score line [0, 3, 2, 1, 4, 0] — all five colors in
+   one word, fills never shown. (The hidden marks behind it: K,A,P,K,A,K.)
+   The glyphs sit at ~0.62em inside 2em boxes so the tiles read like
+   the BOARD's — half glyph, half air, board-tile padding (the first
+   ship's 1.18em boxes hugged the letters; suitangi wanted the board
+   look). Radius in span-em lands at the board's 3px; rise-in is
+   one-shot, so the global reduced-motion rule lands it finished. */
+.mingle-title { white-space: nowrap; }
+.mingle-title > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62em;
+  width: 2em;
+  height: 2em;
+  line-height: 1;
+  border: 2px solid var(--tile-border);
+  border-radius: 0.12em;
+  margin: 0 3px;
+  animation: ming-rise 0.45s ease both;
+}
+.mingle-title > span:nth-child(1) { animation-delay: 0s; }
+.mingle-title > span:nth-child(2) { animation-delay: 0.06s; }
+.mingle-title > span:nth-child(3) { animation-delay: 0.12s; }
+.mingle-title > span:nth-child(4) { animation-delay: 0.18s; }
+.mingle-title > span:nth-child(5) { animation-delay: 0.24s; }
+.mingle-title > span:nth-child(6) { animation-delay: 0.3s; }
+@keyframes ming-rise {
+  from { opacity: 0; transform: translateY(0.3em); }
+}
+.mingle-title > span.sc1 { border-color: var(--ms1); }
+.mingle-title > span.sc2 { border-color: var(--ms2); }
+.mingle-title > span.sc3 { border-color: var(--ms3); }
+.mingle-title > span.sc4 { border-color: var(--ms4); }
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.mingrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
