@@ -3335,6 +3335,73 @@ body.mingle {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .mingrow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Quartile board (Day 24) ---------- */
+
+/* Page-scoped accent: chocolate — the bar that breaks in quarters.
+   Every other family was long claimed (blue→Castle/Findle/Bundle,
+   orange→Hustle, terracotta→Crumble, stone→Tuple); warm cocoa is the
+   free slot. Scoped on body.quartile, do NOT touch :root --accent. */
+body.quartile {
+  --accent: #7c2d12;
+  --accent-soft: rgba(124, 45, 18, 0.12);
+}
+[data-theme="dark"] body.quartile {
+  --accent: #d2a679;
+  --accent-soft: rgba(210, 166, 121, 0.18);
+}
+
+.quartile-game { max-width: 320px; }
+
+/* Rows grow on demand inside the shared scroll window — four tiles
+   each; the stream of guesses fills them in reading order. */
+.qrow {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  animation: wrow-in 0.3s ease both;
+}
+.qrow.quiet { animation: none; }
+
+/* The winning row across glows (keyframes shared with every day); the
+   ghost answer wears it too. */
+.qrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title wraps by every 4 letters — Quar / tile — the whole game
+   in one word. A 4-column grid of mono cells: each glyph is exactly
+   1ch, so both lines align like the board's columns and the wrap is
+   structural, not a <br>. Letters rise in reading order (one-shot, so
+   the global reduced-motion rule lands it finished); the wrapped t —
+   the letter that jumped to the next row — wears the accent. */
+.quartile-title {
+  display: grid;
+  grid-template-columns: repeat(4, 1ch);
+  grid-auto-rows: 1.2em;
+  width: fit-content;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0;
+}
+.quartile-title span {
+  animation: quart-rise 0.45s ease both;
+}
+.quartile-title span:nth-child(1) { animation-delay: 0s; }
+.quartile-title span:nth-child(2) { animation-delay: 0.05s; }
+.quartile-title span:nth-child(3) { animation-delay: 0.1s; }
+.quartile-title span:nth-child(4) { animation-delay: 0.15s; }
+.quartile-title span:nth-child(5) { animation-delay: 0.2s; }
+.quartile-title span:nth-child(6) { animation-delay: 0.25s; }
+.quartile-title span:nth-child(7) { animation-delay: 0.3s; }
+.quartile-title span:nth-child(8) { animation-delay: 0.35s; }
+.quartile-title span.wrap { color: var(--accent); }
+@keyframes quart-rise {
+  from { opacity: 0; transform: translateY(0.3em); }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.qrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
