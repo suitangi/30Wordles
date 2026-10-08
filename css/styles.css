@@ -3402,6 +3402,141 @@ body.quartile {
    shake (the Day 1 gotcha). submit() still clears shake first. */
 .qrow .tile.shake { animation: shake 0.55s ease; }
 
+/* ---------- Dividle board (Day 25) ---------- */
+
+/* Page-scoped accent: olive — dull, yellow-leaning green, a family the
+   audit never touched (Swivel's moss #4d7c0f is grass-bright, Scramble
+   emerald, Peddle money-green). The line that cuts every word wears
+   it. Scoped on body.dividle, do NOT touch :root --accent. */
+body.dividle {
+  --accent: #5e6414;
+  --accent-soft: rgba(94, 100, 20, 0.14);
+}
+[data-theme="dark"] body.dividle {
+  --accent: #c8d16a;
+  --accent-soft: rgba(200, 209, 106, 0.18);
+}
+
+.dividle-game { max-width: 380px; }
+
+/* The board is a fixed seven-row column (the Stifle shape) — every
+   row's division line stays visible, no scrolling. width: 100% is
+   load-bearing: .game is a centered flex column, and without it the
+   board shrink-wraps and the empty aspect-ratio tiles collapse their
+   1fr tracks to zero (the whole board renders pin-size). */
+.dvboard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Each row: triangle, word, triangle (the Encircle flank grid). The
+   arrows are the live row's alone; visibility keeps every board's
+   columns aligned on the scored rows. */
+.dvrow {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  gap: 5px;
+  align-items: stretch;
+  animation: wrow-in 0.3s ease both;
+}
+.dvrow.quiet { animation: none; }
+
+.dvarrow {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  visibility: hidden;
+  transition: color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+}
+.dvarrow svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+.dvarrow:hover { color: var(--text); background: var(--hover); }
+.dvarrow:disabled { opacity: 0.3; cursor: default; }
+.dvarrow:disabled:hover { color: var(--muted); background: transparent; }
+.dvrow.on .dvarrow { visibility: visible; }
+
+/* The word side: five tiles and the line that rides between them. The
+   line's left edge sits centered in the gap after the (--d)th tile —
+   tile pitch is (100% + 5px)/5 with the 5px column gap, so
+   left = (--d)·pitch − half the gap − half the line. */
+.dvword {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+.dvline {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  left: calc((100% + 5px) * var(--d, 2) / 5 - 3.5px);
+  transition: left 0.18s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+}
+/* A scored row's cut is part of its record — the line dims and the
+   halo lifts (the ghost answer's line goes with it). */
+.dvrow.scored .dvline {
+  background: var(--tile-border-filled);
+  box-shadow: none;
+}
+
+/* The title wears the game's own cut: Divi | dle, an accent line
+   between the halves. Letters rise in, then the line grows down the
+   middle (one-shot, so the global reduced-motion rule lands it
+   finished). */
+.dividle-title {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.dividle-title > span {
+  display: inline-block;
+  animation: div-rise 0.45s ease both;
+}
+.dividle-title > span:nth-child(1) { animation-delay: 0s; }
+.dividle-title > span:nth-child(2) { animation-delay: 0.05s; }
+.dividle-title > span:nth-child(3) { animation-delay: 0.1s; }
+.dividle-title > span:nth-child(4) { animation-delay: 0.15s; }
+.dividle-title > span:nth-child(5) { animation-delay: 0.2s; }
+.dividle-title > span:nth-child(6) { animation-delay: 0.25s; }
+.dividle-title > span:nth-child(7) { animation-delay: 0.3s; }
+.dividle-title > span:nth-child(8) { animation-delay: 0.35s; }
+.dividle-title > span.dline {
+  width: 3px;
+  height: 0.95em;
+  margin: 0 0.13em;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: center;
+  animation: div-line 0.4s ease 0.45s both;
+}
+@keyframes div-rise {
+  from { opacity: 0; transform: translateY(0.3em); }
+}
+@keyframes div-line {
+  from { opacity: 0; transform: scaleY(0.15); }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.dvrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
