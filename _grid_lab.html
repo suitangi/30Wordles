@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triple — grid lab</title>
+<style>
+  :root { --olive: #b3bd7e; --line: #6b7146; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; display: flex; height: 100vh; background: #f4f4f0; }
+  #wrap { flex: 1; overflow: auto; padding: 10px; }
+  svg { display: block; margin: 0 auto; }
+  .panel { width: 300px; background: #fff; border-left: 1px solid #ddd; padding: 14px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
+  h1 { font-size: 16px; margin: 0; }
+  .hint { color: #666; line-height: 1.4; }
+  .tabs { display: flex; gap: 6px; }
+  .tabs button { flex: 1; padding: 8px 4px; border: 2px solid #ccc; background: #eee; border-radius: 6px; cursor: pointer; font-weight: 600; }
+  .tabs button.on { border-color: #333; background: #fff; }
+  .tabs button .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .brushes { display: flex; gap: 6px; }
+  .brushes button { flex: 1; padding: 8px 4px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; color: #fff; font-weight: 600; }
+  .brushes button.on { outline: 3px solid #333; }
+  textarea { width: 100%; flex: 1; font-family: ui-monospace, monospace; font-size: 11px; white-space: pre; }
+  #copy { padding: 8px; border: 1px solid #ccc; border-radius: 6px; background: #eee; cursor: pointer; font-weight: 600; }
+  .hex { stroke: var(--line); stroke-width: 1.2; cursor: pointer; }
+  .hex.empty { fill: var(--olive); }
+  .hex.b { fill: #5b9bd5; } .hex.o { fill: #ffa100; } .hex.g { fill: #666; }
+  text { pointer-events: none; font-size: 11px; fill: rgba(0,0,0,.55); font-family: ui-monospace, monospace; }
+  .colored + text { fill: rgba(255,255,255,.85); }
+</style>
+</head>
+<body>
+<div id="wrap"><svg id="svg"></svg></div>
+<div class="panel">
+  <h1>Paint the three boards</h1>
+  <div class="hint">One tab per view (like your three screenshots — paint each view separately; shared hexes can wear different colors per view). Pick a brush, click/drag on the grid. Click an already-brushed hex to clear it.</div>
+  <div class="tabs" id="tabs"></div>
+  <div class="brushes" id="brushes"></div>
+  <textarea id="out" rows="20" spellcheck="false"></textarea>
+  <button id="copy">Copy assignment</button>
+</div>
+<script>
+(function () {
+  const COLS = 17, ROWS = 15;
+  const S = 30;                      // circumradius
+  const W = 2 * S, H = Math.sqrt(3) * S;   // flat-top: 60 x 51.96
+  const PX = 0.75 * W + 3;           // column pitch
+  const PY = H + 3;                  // row pitch
+  const PAD = 30;
+  const COLORS = { e: '#b3bd7e', b: '#5b9bd5', o: '#ffa100', g: '#666666' };
+  const NAMES  = { e: 'empty', b: 'blue (W1)', o: 'orange (W2)', g: 'gray (W3)' };
+
+  const svg = document.getElementById('svg');
+  svg.setAttribute('width',  COLS * PX + PAD * 2 + S);
+  svg.setAttribute('height', ROWS * PY + PAD * 2 + H / 2);
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // state: three independent view layers
+  const views = [new Map(), new Map(), new Map()];
+  let cur = 0, brush = 'b', painting = false, dragMoved = false;
+
+  function center(c, r) {
+    return [PAD + S + c * PX, PAD + S * Math.sqrt(3) / 2 + r * PY + (c % 2 ? H / 2 : 0)];
+  }
+  function pts(cx, cy) {
+    const h = H / 2, s2 = S / 2;
+    return [[cx + S, cy], [cx + s2, cy + h], [cx - s2, cy + h], [cx - S, cy], [cx - s2, cy - h], [cx + s2, cy - h]]
+      .map(p => p.join(',')).join(' ');
+  }
+  const polys = [];
+  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+    const [cx, cy] = center(c, r);
+    const p = document.createElementNS(NS, 'polygon');
+    p.setAttribute('points', pts(cx, cy));
+    p.setAttribute('class', 'hex empty');
+    p.dataset.c = c; p.dataset.r = r;
+    p.addEventListener('pointerdown', ev => { painting = true; dragMoved = false; paint(ev.currentTarget, true); });
+    p.addEventListener('pointerenter', ev => { if (painting) { dragMoved = true; paint(ev.currentTarget, false); } });
+    svg.appendChild(p);
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', cx); t.setAttribute('y', cy + 4); t.setAttribute('text-anchor', 'middle');
+    t.textContent = c + ',' + r;
+    svg.appendChild(t);
+    polys.push(p);
+  }
+  window.addEventListener('pointerup', () => { painting = false; });
+
+  function paint(p, isClick) {
+    const key = p.dataset.c + ',' + p.dataset.r;
+    const m = views[cur];
+    if (isClick && !dragMoved && m.get(key) === brush && brush !== 'e') m.delete(key);
+    else if (brush === 'e') m.delete(key);
+    else m.set(key, brush);
+    render();
+  }
+  function render() {
+    for (const p of polys) {
+      const col = views[cur].get(p.dataset.c + ',' + p.dataset.r) || 'e';
+      p.setAttribute('class', 'hex ' + col);
+    }
+    let out = '';
+    for (let v = 0; v < 3; v++) {
+      out += 'view' + (v + 1) + ':\n';
+      for (const k of ['b', 'o', 'g']) {
+        const ks = [...views[v].entries()].filter(e => e[1] === k).map(e => e[0]).sort((a, b) => {
+          const [c1, r1] = a.split(',').map(Number), [c2, r2] = b.split(',').map(Number);
+          return r1 - r2 || c1 - c2;
+        });
+        if (ks.length) out += '  ' + NAMES[k] + ' (' + ks.length + '): ' + ks.join(' ') + '\n';
+      }
+    }
+    document.getElementById('out').value = out;
+  }
+
+  // tabs
+  const tabLabels = [['#5b9bd5', 'View 1 (blue)'], ['#ffa100', 'View 2 (orange)'], ['#666666', 'View 3 (gray)']];
+  const tabsEl = document.getElementById('tabs');
+  tabLabels.forEach((tl, i) => {
+    const b = document.createElement('button');
+    b.innerHTML = '<span class="sw" style="background:' + tl[0] + '"></span>' + tl[1];
+    if (i === 0) b.classList.add('on');
+    b.onclick = () => { cur = i; [...tabsEl.children].forEach((x, j) => x.classList.toggle('on', j === i)); render(); };
+    tabsEl.appendChild(b);
+  });
+  // brushes
+  const brEl = document.getElementById('brushes');
+  [['b', COLORS.b], ['o', COLORS.o], ['g', COLORS.g], ['e', '#888']].forEach(([k, col], i) => {
+    const b = document.createElement('button');
+    b.style.background = col; b.textContent = NAMES[k].split(' ')[0];
+    if (i === 0) b.classList.add('on');
+    b.onclick = () => { brush = k; [...brEl.children].forEach(x => x.classList.remove('on')); b.classList.add('on'); };
+    brEl.appendChild(b);
+  });
+  document.getElementById('copy').onclick = () => {
+    const t = document.getElementById('out');
+    t.select();
+    navigator.clipboard.writeText(t.value).catch(() => document.execCommand('copy'));
+  };
+  render();
+})();
+</script>
+</body>
+</html>
