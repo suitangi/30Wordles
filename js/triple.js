@@ -6,17 +6,17 @@
 // Three wordles crossed through one honeycomb of flat-top hexes, laid out
 // by suitangi's painted map. Board 1 (blue) is six words running up the
 // NE diagonals; board 2 (orange) is nine words running up the columns;
-// board 3 (gray) is seven words on the same diagonals, shifted one column
-// right per row. The boards overlap: blue's first five words refill
-// orange's first five columns (25 shared hexes), and blue + orange seed
-// gray's first five rows (25 more). One hex, one letter, scored against
-// each board's own answer — the view decides whose clue a shared hex
-// wears, like Swivel's duos.
+// board 3 (purple) is seven words on the same diagonals, shifted one
+// column right per row. The boards overlap: blue's first five words
+// refill orange's first five columns (25 shared hexes), and blue + orange
+// seed purple's first five rows (25 more). One hex, one letter, scored
+// against each board's own answer — the view decides whose clue a shared
+// hex wears, like Swivel's duos.
 //
 // You type on whichever board faces you: 6 guesses on blue, then 4 fresh
-// columns on orange, then 2 fresh rows on gray. The Swivel button turns
-// the board so the active wordle reads downward (blue +120deg, orange
-// 180deg, gray +120deg — glyphs counter-rotate and stay face-up). Each
+// columns on orange, then 2 fresh rows on purple. The Swivel button turns
+// the board +60deg so orange's columns read across (glyphs
+// counter-rotate and stay face-up). Each
 // view outlines its own board in its color. A line that spells its
 // board's answer counts as found even if the carry-over fill spelled it,
 // not you. Lose a board (budget spent wrong) and the others still play;
@@ -54,12 +54,29 @@
   var found = [false, false, false]; // cache for glow/transition detection
   var done = false;
   var gaveUp = false;
-  var view = 0;                 // 0 blue, 1 orange, 2 gray — view AND input target
+  var view = 0;                 // 0 blue, 1 orange, 2 purple — view AND input target
   var revealing = false;
   var practice = false;
   var quiet = false;            // restore flag: rebuilt hexes are born resolved
   var typed = [];
   var toastTimer = null;
+  var swivelOff = [0, 0];       // view-2 re-centering translate, px (debug)
+
+  // Debug sizing log: load the page with ?debug (or #debug) once and the
+  // flag sticks for the session — buildBoard then dumps its sizing
+  // numbers on every rebuild and resize events log themselves, so
+  // viewport toggles (DevTools device mode, phone rotation) can be
+  // traced in the console. ?debug=off (or #debug-off) clears it.
+  var debug = false;
+  try {
+    var dflag = location.search + " " + location.hash;
+    if (/debug=off|debug-off/.test(dflag)) {
+      localStorage.removeItem("triple-debug");
+    } else if (/debug/.test(dflag)) {
+      localStorage.setItem("triple-debug", "on");
+    }
+    debug = localStorage.getItem("triple-debug") === "on";
+  } catch (e) {}
 
   // ---------- geometry (the painted map, lab coords) ----------
   //
@@ -81,7 +98,7 @@
   // own[b] = { line, pos } — the hex's line index and 1-based letter
   // position within board b's word. Every hex is claimed by at least one
   // board; the typed regions are disjoint (blue's 30, orange-only 20,
-  // gray-only 10).
+  // purple-only 10).
   var HEXES = {};
   function claim(c, r, b, line, pos) {
     var key = keyOf(c, r);
@@ -229,7 +246,7 @@
 
   // The letter sitting on a hex, derived from the typed guesses (the
   // carry-over is never stored — a hex's letter is wherever it was
-  // placed: blue's words first, then orange's typed columns, then gray's
+  // placed: blue's words first, then orange's typed columns, then purple's
   // typed rows).
   function letterAt(h) {
     if (!h) return "";
@@ -317,7 +334,7 @@
 
   // Where the next typed word lands for the board facing the player:
   // blue's next row (0-5), orange's next open column (5-8 — the first
-  // five columns are the carry-over), gray's next open row (5-6). A
+  // five columns are the carry-over), purple's next open row (5-6). A
   // FOUND board keeps typing until its budget is spent — spare rows are
   // how you seed the later boards (the Swivel rule) — only a LOST board
   // (or a spent one) refuses. -1 when nothing is left.
@@ -395,15 +412,14 @@
   // ---------- board build & layout ----------
   //
   // The painted map is a flat-top honeycomb whose NE diagonals carry the
-  // blue and gray words. Baking a 30deg rotation into the render coords
-  // stands that honeycomb up pointy-top with blue/gray reading as
+  // blue and purple words. Baking a 30deg rotation into the render coords
+  // stands that honeycomb up pointy-top with blue/purple reading as
   // straight horizontal rows (guess-rows sheared half a hex, the Muddle
   // look), and orange's columns reading across after exactly one 60deg
   // swivel. Hexes tile FLUSH: the painted pitches are col 1.5*s, row
   // sqrt(3)*s, odd columns half a row — the render is that lattice
   // rotated 30deg (an exact lattice symmetry for the hex shapes, so
-  // tiling survives). Views 1/3 add a CSS -5deg tilt (suitangi's
-  // preference); view 2 turns +60deg.
+  // tiling survives). Views 1/3 sit flush at 0deg; view 2 turns +60deg.
 
   var S = 35.2;                       // painted flat-top circumradius
   var COL_P = 1.5 * S;                // 52.8 painted column pitch
@@ -435,13 +451,22 @@
 
   function buildBoard() {
     boardEl.innerHTML = "";
-    var avail = Math.min((document.documentElement.clientWidth || 1024) - 32, 560);
+    // Page gutter is 24px a side (16px under the 480px query); the cap
+    // sets the desktop board size.
+    var cw = document.documentElement.clientWidth || 1024;
+    var avail = Math.min(cw - (cw <= 480 ? 32 : 48), 620);
 
     renderList = [];
     for (var key in HEXES) renderList.push(HEXES[key]);
     for (var rkey in RING) renderList.push(RING[rkey]);
 
-    // raw (unscaled) rotated bbox over the hex centers, then a fit pass
+    // raw (unscaled) rotated bbox over the hex centers, then a fit pass.
+    // fit MUST be reset first: hexCenter bakes in the current fit, so
+    // measuring through a stale one corrupts rawW — and rawW mixes that
+    // bbox with unscaled HEX_W — compounding on every resize rebuild
+    // until fit hit its 1 cap and the board rendered full size (the
+    // "board randomly gets much bigger" bug on rotate / device toggle).
+    fit = 1;
     var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
     renderList.forEach(function (h) {
       var pt = hexCenter(h);
@@ -467,27 +492,41 @@
     var bw = Math.ceil(maxX - minX + hw);
     var bh = Math.ceil(maxY - minY + hh);
 
-    // The pivot must hold every view's rotated footprint; compute them
-    // once and take the union so the box never jumps between views.
-    // View 2 turns +60deg to stand orange's columns across.
-    var rots = [0, 60, 0];
-    var pMinX = 1e9, pMinY = 1e9, pMaxX = -1e9, pMaxY = -1e9;
-    var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-    rots.forEach(function (deg) {
+    // The pivot is a FIXED box so nothing jumps between views — but it is
+    // sized to the LARGEST SINGLE view's footprint, never the union of
+    // the rotated bboxes. Rotating a shape about its center also SHIFTS
+    // that shape's bbox, and unioning the shifted boxes bloated the pivot
+    // wider than a phone viewport (the mobile horizontal-scroll bug).
+    // Instead each view re-centers its own silhouette: view 2 carries a
+    // --tp-cx/--tp-cy translate (measured here, consumed by the CSS
+    // transform) so both views sit centered in one viewport-safe box.
+    // View 2 turns +60deg to stand orange's columns across. The rotation
+    // origin is the board rect's center — the CSS default — so offsets
+    // are measured about (minX+maxX+hw)/2, not the centers' centroid.
+    var OX = (minX + maxX + hw) / 2, OY = (minY + maxY + hh) / 2;
+    var pivW = 0, pivH = 0, swX = 0, swY = 0;
+    [0, 60, 0].forEach(function (deg, vi) {
       var a = deg * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a);
+      var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
       renderList.forEach(function (h) {
         var pt = hexCenter(h);
-        var dx = pt[0] - cx, dy = pt[1] - cy;
+        var dx = pt[0] - OX, dy = pt[1] - OY;
         var rx = dx * cos - dy * sin, ry = dx * sin + dy * cos;
-        if (rx < pMinX) pMinX = rx;
-        if (rx > pMaxX) pMaxX = rx;
-        if (ry < pMinY) pMinY = ry;
-        if (ry > pMaxY) pMaxY = ry;
+        if (rx < x0) x0 = rx;
+        if (rx > x1) x1 = rx;
+        if (ry < y0) y0 = ry;
+        if (ry > y1) y1 = ry;
       });
+      // hexes reach hw/2 sideways and hh/2 vertically past their centers
+      if (x1 - x0 + hw > pivW) pivW = x1 - x0 + hw;
+      if (y1 - y0 + hh > pivH) pivH = y1 - y0 + hh;
+      if (vi === 1) { swX = -(x0 + x1) / 2; swY = -(y0 + y1) / 2; }
     });
-    var pad = Math.max(hw, hh) / 2;
-    pivotEl.style.width = Math.ceil(pMaxX - pMinX + pad * 2) + "px";
-    pivotEl.style.height = Math.ceil(pMaxY - pMinY + pad * 2) + "px";
+    pivotEl.style.width = Math.floor(pivW) + "px";
+    pivotEl.style.height = Math.ceil(pivH) + "px";
+    boardEl.style.setProperty("--tp-cx", Math.round(swX) + "px");
+    boardEl.style.setProperty("--tp-cy", Math.round(swY) + "px");
+    swivelOff = [Math.round(swX), Math.round(swY)];
 
     boardEl.style.width = bw + "px";
     boardEl.style.height = bh + "px";
@@ -527,6 +566,15 @@
         '<path d="' + dPath + '" fill="none" stroke-width="3.5"' +
         ' stroke-linejoin="round" stroke-linecap="round"/></svg>';
       boardEl.appendChild(wrap);
+    }
+
+    if (debug) {
+      console.log("[triple] build cw=" + cw + " avail=" + avail +
+        " rawW=" + Math.round(rawW) + " fit=" + fit.toFixed(3) +
+        " board=" + bw + "x" + bh +
+        " pivot=" + pivotEl.style.width + "x" + pivotEl.style.height +
+        " swivel=(" + Math.round(swX) + ", " + Math.round(swY) + ")px" +
+        " view=" + (view + 1) + "/3");
     }
   }
 
@@ -964,7 +1012,7 @@
 
   // ---------- share ----------
   //
-  // Three blocks — blue's rows, orange's columns, gray's rows — one emoji
+  // Three blocks — blue's rows, orange's columns, purple's rows — one emoji
   // line per line that carries letters, scored against its own board.
   // Carry-over lines share too: they are the record of what the fill
   // told you. Lines with holes pad with the theme empty square.
@@ -1039,6 +1087,10 @@
   });
 
   window.addEventListener("resize", function () {
+    if (debug) {
+      console.log("[triple] resize (cw=" +
+        document.documentElement.clientWidth + ")");
+    }
     buildBoard();
     repaintBoard();
   });
@@ -1085,6 +1137,21 @@
     },
     view: function () { return view; },
     swivelTo: function (v) { swivelTo(v); },
+    // Current sizing snapshot — call TRIPLE.size() in the console after
+    // any viewport change (device-mode toggle, rotation) to compare
+    // against the build log.
+    size: function () {
+      var r = {
+        clientWidth: document.documentElement.clientWidth,
+        board: { width: boardEl.style.width, height: boardEl.style.height },
+        pivot: { width: pivotEl.style.width, height: pivotEl.style.height },
+        swivel: swivelOff.slice(),
+        font: boardEl.style.fontSize,
+        view: view + 1
+      };
+      if (debug) console.log("[triple] size", r);
+      return r;
+    },
     dump: function () {
       return {
         answers: answers.slice(),

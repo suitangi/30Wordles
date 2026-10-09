@@ -391,7 +391,7 @@ function boardConsistent(boardIdx, trio, secret) {
   assert.equal(dump().found[2], true, "gray found by the carry");
   assert.equal(dump().found[0], false);
   assert.equal(dump().done, false);
-  assert.ok(toast.textContent.includes("gray"), "the fill gets a toast");
+  assert.ok(toast.textContent.includes("purple"), "the fill gets a toast");
   assert.ok(cellEl(2, 4).classList.contains("win-glow"), "the row glows");
 }
 

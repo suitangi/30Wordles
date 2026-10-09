@@ -3542,7 +3542,7 @@ body.dividle {
 /* Page-scoped accent: denim blue — the blue board's color muted for
    buttons. (Bundle owns root water blue, Castle cobalt, Findle sky; this
    is the flat desaturated slot between them.) The three boards wear
-   their identity colors from the painted map: blue / orange / gray.
+   their identity colors from the painted map: blue / orange / purple.
    Scoped on body.triple, do NOT touch :root --accent. */
 body.triple {
   --accent: #35548c;
@@ -3559,7 +3559,9 @@ body.triple {
   --w3: #a78bfa;
 }
 
-.triple-game { max-width: 580px; }
+.triple-game { max-width: 624px; }
+/* The bigger board outgrows the shared narrow page (620px). */
+body.triple .page.narrow { max-width: 672px; }
 .triple-game .game-banner { margin: 16px 0 18px; }
 .triple-game .game-actions { flex-wrap: wrap; justify-content: center; }
 
@@ -3568,23 +3570,29 @@ body.triple {
    need their own line. */
 body.triple .key { transition: background-color 0.45s ease; }
 
-/* The pivot is a FIXED box sized (in px, by JS) to hold every view's
-   rotated footprint, so nothing jumps between views. The render coords
-   are baked rotated 30deg, so the honeycomb stands pointy-top with the
-   blue and gray words reading straight across (guess-rows sheared half
-   a hex below each other, the Muddle look). View 2 swivels +60deg
-   from the baked frame to stand orange's columns across; the glyphs
-   counter-rotate and stay face-up. (Views 1/3 briefly carried a -5deg
-   tilt — pulled by suitangi once the flush grid landed.) Hexes reuse
-   Muddle's .hex / .hex-in pieces (flush pointy-top clip-path, marks,
-   flip, shake, colorblind). */
+/* The pivot is a FIXED box sized (in px, by JS) to the largest single
+   view's rotated footprint, so nothing jumps between views. The render
+   coords are baked rotated 30deg, so the honeycomb stands pointy-top
+   with the blue and purple words reading straight across (guess-rows
+   sheared half a hex below each other, the Muddle look). View 2 swivels
+   +60deg from the baked frame to stand orange's columns across — and
+   rotating also shifts a view's silhouette off-center, so view 2 adds
+   the --tp-cx/--tp-cy re-centering translate that JS measures per fit.
+   Sizing the pivot to one view instead of the union of the shifted
+   boxes is what keeps it inside a phone viewport (the horizontal-scroll
+   bug). The glyphs counter-rotate and stay face-up; views 1/3 sit flush
+   at 0deg. Hexes reuse Muddle's .hex / .hex-in pieces (flush pointy-top
+   clip-path, marks, flip, shake, colorblind). */
 .tp-pivot { position: relative; margin: 0 auto; }
 .tp-board {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) translate(0, 0) rotate(0deg);
   transition: transform 0.65s cubic-bezier(0.7, 0, 0.3, 1);
 }
-.tp-pivot.view-2 .tp-board { transform: translate(-50%, -50%) rotate(60deg); }
+.tp-pivot.view-2 .tp-board {
+  transform: translate(-50%, -50%)
+    translate(var(--tp-cx, 0px), var(--tp-cy, 0px)) rotate(60deg);
+}
 
 /* Every glyph rides a .lt span that counter-rotates against the board,
    so letters land face-up in every view — and visibly turn during the
