@@ -3778,6 +3778,97 @@ body.ordinal {
 .orow .tile.shake { animation: shake 0.55s ease; }
 .orentry.shake { animation: shake 0.55s ease; }
 
+/* ---------- Aisle board (Day 28) ---------- */
+
+/* Page-scoped accent: sea glass — the grayed shelf of Toggle's teal,
+   the last quiet corner left (every vivid family was long claimed; the
+   muted-shade precedent is Triple's denim). Root --accent stays
+   Bundle's water blue. */
+body.aisle {
+  --accent: #4e7d74;
+  --accent-soft: rgba(78, 125, 116, 0.12);
+}
+[data-theme="dark"] body.aisle {
+  --accent: #9fd3c4;
+  --accent-soft: rgba(159, 211, 196, 0.16);
+}
+
+.aisle-game { max-width: 380px; }
+
+.aiboard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* The aisle itself: one continuous hairline down the middle of the
+   board. The rows are positioned, so they (and their letters) paint
+   over it — and since the middle tiles never take a mark color, their
+   transparent centers are exactly what let the line show through. The
+   aisle is a gap in the clues, not a feature, so it wears the border
+   gray, not the accent. */
+.aiboard::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  background: var(--border);
+}
+.airow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+/* The middle tile: born colorless, stays colorless — through the flip,
+   on the win, and on the ghost row. Its letter sits muted: typed, part
+   of the word, never a clue. */
+.airow .tile.aicol { color: var(--muted); }
+
+/* The winning row glows down its line (keyframes shared with every
+   day) — the colorless middle glows with it. */
+.airow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title plays the game: the four letters around the aisle wash
+   green → yellow → green forever — the two clue colors the sides
+   speak — while the middle letter sits in muted gray: the aisle never
+   talks. Per-letter phase offsets via negative delays (no
+   calc-in-delay); the two sides drift out of phase, the way their
+   clues answer separately. Infinite, so reduced-motion is handled HERE
+   section-scoped: the global reduce rule only shortens durations and a
+   0.01ms INFINITE animation machine-guns (the Encircle lesson). */
+.aisle-title span { display: inline-block; }
+.aisle-title span:nth-child(3) { color: var(--muted); }
+.aisle-title span:nth-child(1),
+.aisle-title span:nth-child(2),
+.aisle-title span:nth-child(4),
+.aisle-title span:nth-child(5) { animation: aisle-hue 6s ease-in-out infinite; }
+.aisle-title span:nth-child(2) { animation-delay: -1.5s; }
+.aisle-title span:nth-child(4) { animation-delay: -0.75s; }
+.aisle-title span:nth-child(5) { animation-delay: -2.25s; }
+@keyframes aisle-hue {
+  0%, 100% { color: var(--correct); }
+  50% { color: var(--present); }
+}
+[data-colorblind="on"] .aisle-title span { animation-name: aisle-hue-cb; }
+@keyframes aisle-hue-cb {
+  0%, 100% { color: var(--cb-correct); }
+  50% { color: var(--cb-present); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aisle-title span { animation: none; color: var(--text); }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first. */
+.airow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
