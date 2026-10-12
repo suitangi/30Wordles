@@ -490,8 +490,8 @@ shareBtn.click();
   const lines = ta.value.split("\n");
   assert.match(lines[0], /^Idle · practice · 1\/1$/, "the win shares 1/1");
   assert.equal(lines[1], GAME_URL, "share links to the game");
-  assert.equal(lines[2],
-    "CRANE " + "\uD83D\uDFE9".repeat(5), "the perfect guess shares five greens");
+  assert.equal(lines[2], "\uD83D\uDFE9".repeat(5),
+    "the win shares its five green blocks — no word, no spoil");
 }
 console.log("ok — the win: green row, frozen clock, 1/1 with the emoji line");
 

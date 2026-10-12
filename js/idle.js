@@ -731,8 +731,9 @@
 
   // ---------- share ----------
 
-  // The time is the score; the one guess is the story. Header, URL, one
-  // emoji line — the record of the single shot at the answer.
+  // The time is the score; the emoji line records the shot. No word in
+  // the share — word plus colors would spoil the answer for anyone who
+  // hasn't played. The blocks alone say how close it was.
   function share() {
     var emptyCell = document.documentElement.dataset.theme === "dark"
       ? "\u2B1B" : "\u2B1C";
@@ -744,7 +745,7 @@
     var lines = [title, GAME_URL];
     if (won || guess) {
       var marks = evaluate(guess, answer);
-      lines.push(guess.toUpperCase() + " " + marks.map(function (m) {
+      lines.push(marks.map(function (m) {
         return EMOJI[m];
       }).join(""));
     }
