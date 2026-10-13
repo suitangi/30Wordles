@@ -4032,6 +4032,165 @@ body.idle .tile.reveal { animation-duration: 0.3s; }
   .idle-title::after { animation: none; opacity: 0; }
 }
 
+/* ---------- Gamble board (Day 30) ---------- */
+
+/* Page-scoped accent: wine — the dark shelf of the red-pink band
+   (Stifle owns the crimson, Meddle the rose, Ordinal the mauve; the
+   muting-a-claimed-hue precedent is Triple's denim). A card-table
+   color for a game about the money you leave on the table. Root
+   --accent stays Bundle's water blue. */
+body.gamble {
+  --accent: #6d2137;
+  --accent-soft: rgba(109, 33, 55, 0.12);
+}
+[data-theme="dark"] body.gamble {
+  --accent: #cf8fa1;
+  --accent-soft: rgba(207, 143, 161, 0.16);
+}
+
+.gamble-game { max-width: 480px; }
+
+/* The pot: the whole economy in one line — what's left of the 10.
+   The swatch wears the page accent: a clue point has no color until
+   it's spent on the board. */
+.gb-budget {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.gb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.gb-chip b {
+  font-size: 17px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.gb-chip .sw {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--on-color);
+  background: var(--accent);
+}
+
+/* Guess rows: five tiles and one bet stepper. The stepper is a custom
+   [−] value [+] control — native spinners are tiny and vanish on some
+   browsers, and the buttons are the up/down a thumb can actually hit
+   (suitangi, "bigger and easier to click, especially mobile").
+   flex: none — the rows sit in the shared scroll window, which would
+   otherwise shrink them (the Peddle lesson). */
+.gbrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 100px;
+  gap: 5px;
+  align-items: center;
+  flex: none;
+  animation: wrow-in 0.3s ease both;
+}
+.gbrow.quiet { animation: none; }
+.gb-step {
+  display: flex;
+  align-items: stretch;
+  height: 52px;
+  border: 2px solid var(--tile-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: transparent;
+}
+.gb-step button {
+  width: 30px;
+  border: none;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.12s ease;
+}
+.gb-step button:hover { background: var(--hover); }
+.gb-step button:disabled { opacity: 0.35; cursor: default; }
+.gb-step input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.gb-step input::-webkit-outer-spin-button,
+.gb-step input::-webkit-inner-spin-button {
+  appearance: none;
+  -moz-appearance: textfield;
+  margin: 0;
+}
+.gb-step input:focus { outline: none; }
+.gbrow.scored .gb-step { opacity: 0.55; }
+
+/* The winning row glows down its line (keyframes shared with every day). */
+.gbrow .tile.win-glow { animation: win-glow 1.6s ease 0.4s; }
+
+/* The title gambles: every letter slowly turns over muted → yellow →
+   green → muted — the three states of a clue you haven't bought yet.
+   Per-letter phase offsets via negative delays (no calc-in-delay).
+   Infinite, so reduced-motion is handled HERE section-scoped (the
+   Encircle machine-gun lesson) and parks the letters in --text. */
+/* The title is a slot machine: each letter is a reel of random cells
+   (built by an inline script in the page) spinning at the SAME speed —
+   later reels just carry more strip — and stopping in sequence, left
+   to right. The static transform is the settled letter (--settle), so
+   the animation only declares its "from": reduced-motion is covered by
+   the global 0.01ms rule landing the finite animation finished, word
+   readable. Monospace 1ch slots, the Ordinal geometry. */
+.gamble-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+.gamble-title .slot {
+  display: inline-block;
+  width: 1ch;
+  height: 1em;
+  overflow: hidden;
+  text-align: center;
+}
+.gamble-title .reel {
+  display: block;
+  white-space: pre;
+  line-height: 1;
+  transform: translateY(var(--settle, 0));
+  animation: gamble-reel 1.2s cubic-bezier(0.2, 0.55, 0.25, 1) both;
+  will-change: transform;
+}
+@keyframes gamble-reel {
+  from { transform: translateY(0); }
+}
+
+/* Restated last and at full specificity: any future tile animation
+   classes must not out-rank the shared .tile.shake and mute the reject
+   shake (the Day 1 gotcha). submit() still clears shake first — tiles
+   only, the steppers are children 5 and 6 and never wear it (the
+   Peddle six-children gotcha, one wider). */
+.gbrow .tile.shake { animation: shake 0.55s ease; }
+
 /* ---------- Misc ---------- */
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
